@@ -16,7 +16,7 @@ export default function Navbar() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex gap-16 px-8 py-4 items-center justify-between w-full left-0">
+    <nav className="flex gap-16 px-8 py-4 items-center justify-between bg-primary fixed w-full left-0">
       <a className="font-semibold text-2xl text-red-primary" href="/">PacilFlix</a>
       <div>
         <ul className="flex gap-4">
