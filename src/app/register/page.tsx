@@ -1,3 +1,5 @@
+import React from "react";
+
 export default function Register() {
   return (
     <section className="bg-primary min-h-screen flex flex-col items-center justify-center gap-8">
@@ -17,6 +19,15 @@ export default function Register() {
           <input 
             type="password"
             placeholder="Password"
+            required
+            className="border-4 transition-all border-solid rounded-lg px-3 py-1.5 w-64 bg-white text-black focus:border-red-primary"
+          />
+        </label>
+        <label className="flex flex-col gap-2">
+          <span className="font-semibold">Negara Asal</span>
+          <input 
+            type="text"
+            placeholder="Negara Asal"
             required
             className="border-4 transition-all border-solid rounded-lg px-3 py-1.5 w-64 bg-white text-black focus:border-red-primary"
           />

@@ -1,3 +1,5 @@
+import React from "react";
+
 export default function Register() {
   return (
     <section className="bg-primary min-h-screen flex flex-col items-center justify-center gap-8">
