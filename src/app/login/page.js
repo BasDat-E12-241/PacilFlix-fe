@@ -8,6 +8,7 @@ export default function Register() {
           <input 
             type="text"
             placeholder="Username"
+            required
             className="border-4 transition-all border-solid rounded-lg px-3 py-1.5 w-64 bg-white text-black focus:border-red-primary"
           />
         </label>
@@ -16,6 +17,7 @@ export default function Register() {
           <input 
             type="password"
             placeholder="Password"
+            required
             className="border-4 transition-all border-solid rounded-lg px-3 py-1.5 w-64 bg-white text-black focus:border-red-primary"
           />
         </label>
