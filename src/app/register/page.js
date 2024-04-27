@@ -21,6 +21,15 @@ export default function Register() {
             className="border-4 transition-all border-solid rounded-lg px-3 py-1.5 w-64 bg-white text-black focus:border-red-primary"
           />
         </label>
+        <label className="flex flex-col gap-2">
+          <span className="font-semibold">Negara Asal</span>
+          <input 
+            type="text"
+            placeholder="Negara Asal"
+            required
+            className="border-4 transition-all border-solid rounded-lg px-3 py-1.5 w-64 bg-white text-black focus:border-red-primary"
+          />
+        </label>
         <button type="submit" className="hover:scale-105 active:scale-95 active:opacity-70 transition-all bg-red-primary w-28 justify-center flex rounded-lg py-1.5 font-semibold">
           Daftar
         </button>
