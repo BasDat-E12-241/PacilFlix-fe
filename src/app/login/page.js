@@ -1,7 +1,7 @@
 export default function Register() {
   return (
     <section className="bg-primary min-h-screen flex flex-col items-center justify-center gap-8">
-      <h1 className="text-2xl font-semibold">Form Registrasi</h1>
+      <h1 className="text-2xl font-semibold">Form Login</h1>
       <form className="flex flex-col items-center gap-6">
         <label className="flex flex-col gap-2">
           <span className="font-semibold">Username</span>
@@ -20,10 +20,10 @@ export default function Register() {
           />
         </label>
         <button type="submit" className="hover:scale-105 active:scale-95 active:opacity-70 transition-all bg-red-primary w-28 justify-center flex rounded-lg py-1.5 font-semibold">
-          Daftar
+          Masuk
         </button>
         <span>
-          Sudah punya akun? <a href="/login" className="text-red-primary hover:underline">Login</a>
+          Belum punya akun? <a href="/register" className="text-red-primary hover:underline">Register</a>
         </span>
       </form>
     </section>
