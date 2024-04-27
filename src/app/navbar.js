@@ -1,11 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 function NavLink({ href, isActive, children }) {
   return (
-    <li className={`nav-item ${isActive ? "active" : "" }`}>
-      <a className={`nav-link ${isActive ? "active" : ""} `} href={href}>
+    <li className={`${isActive ? "active" : "" }`}>
+      <a className={`transition-all px-3 py-1 rounded-full ${isActive ? "active font-bold bg-red-primary hover:opacity-70" : "hover:text-red-primary"} `} href={href}>
         {children}
       </a>
     </li>
@@ -13,41 +13,32 @@ function NavLink({ href, isActive, children }) {
 }
 
 export default function Navbar() {
-  const router = useRouter();
+  const pathname = usePathname();
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-light px-4">
-      <a className="navbar-brand" href="#">PacilFlix</a>
-      <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span className="navbar-toggler-icon"></span>
-      </button>
-      <div className="collapse navbar-collapse flex" id="navbarSupportedContent">
-        <ul className="navbar-nav mr-auto">
-          <NavLink href="/pengguna" isActive={router.pathname === "/pengguna"}>
-            Pengguna
+    <nav className="flex gap-16 px-8 py-4 items-center justify-between">
+      <a className="font-semibold text-2xl text-red-primary" href="/">PacilFlix</a>
+      <div>
+        <ul className="flex gap-4">
+          <NavLink href="/daftar-tayangan" isActive={pathname === "/daftar-tayangan"}>
+            Daftar Tayangan
           </NavLink>
-          <NavLink href="/trailer" isActive={router.pathname === "/trailer"}>
-            Trailer
-          </NavLink>
-          <NavLink href="/tayangan" isActive={router.pathname === "/tayangan"}>
-            Tayangan
-          </NavLink>
-          <NavLink href="/ulasan" isActive={router.pathname === "/ulasan"}>
-            Ulasan
-          </NavLink>
-          <NavLink href="/daftar-unduhan" isActive={router.pathname === "/daftar-unduhan"}>
-            Daftar Unduhan
-          </NavLink>
-          <NavLink href="/daftar-favorit" isActive={router.pathname === "/daftar-favorit"}>
-            Daftar Favorit
-          </NavLink>
-          <NavLink href="/daftar-kontributor" isActive={router.pathname === "/daftar-kontributor"}>
+          <NavLink href="/daftar-kontributor" isActive={pathname === "/daftar-kontributor"}>
             Daftar Kontributor
           </NavLink>
-          <NavLink href="/langganan" isActive={router.pathname === "/langganan"}>
+          <NavLink href="/daftar-favorit" isActive={pathname === "/daftar-favorit"}>
+            Daftar Favorit
+          </NavLink>
+          <NavLink href="/daftar-unduhan" isActive={pathname === "/daftar-unduhan"}>
+            Daftar Unduhan
+          </NavLink>
+          <NavLink href="/langganan" isActive={pathname === "/langganan"}>
             Langganan
           </NavLink>
         </ul>
+      </div>
+      <div className="border-2 border-red-primary px-4 rounded-full">
+        Logout
       </div>
     </nav>
   );
