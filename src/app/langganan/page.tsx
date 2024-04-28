@@ -22,7 +22,7 @@ const transactionHistory = [
 ];
 
 export default function LanggananPage() {
-    return (
+  return (
       <div className="container mx-auto pt-8">
         <h1 className="text-center text-4xl my-8">Halaman Kelola Langganan</h1>
         
@@ -72,7 +72,9 @@ export default function LanggananPage() {
                     <td className="border border-gray-300">{subscription.resolusiLayar}</td>
                     <td className="border border-gray-300">{subscription.dukunganPerangkat}</td>
                     <td className="border border-gray-300">
+                      <a href={`/halaman-beli/${subscription.nama}`}>
                         <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Beli</button>
+                      </a>
                     </td>
                     </tr>
                 ))}
