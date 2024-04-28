@@ -19,6 +19,9 @@ export default function Home() {
       <Link href="/daftar-kontributor"  className="hover:scale-105 active:scale-95 active:opacity-70 transition-all bg-red-primary w-28 justify-center flex rounded-lg py-1.5 font-semibold" >
         DaftarKontributor
       </Link>
+      <Link href="/langganan"  className="hover:scale-105 active:scale-95 active:opacity-70 transition-all bg-red-primary w-28 justify-center flex rounded-lg py-1.5 font-semibold" >
+        Langganan
+      </Link>
     </main>
   );
 }
