@@ -80,7 +80,7 @@ const seriesTrailers = [
 ];
 
 export default function Trailer() {
-  const [isActive, setIsActive] = useState(false);
+  const [isActive, setIsActive] = useState(true);
   const [country, setCountry] = useState("Indonesia");
   
   const handleGlobalButtonClick = () => {

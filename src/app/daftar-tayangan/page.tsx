@@ -115,7 +115,7 @@ const seriestayangan = [
 ];
 
 export default function Tayangan() {
-    const [isActive, setIsActive] = useState(false);
+    const [isActive, setIsActive] = useState(true);
     const [country, setCountry] = useState("Indonesia");
     const pathname = usePathname();
 
