@@ -19,7 +19,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { push } = useRouter();
 
   const login = async (username: string, password: string) => {
-    // Call your API here
     const response = await fetch('/api/auth/login', {
       method: 'POST',
       headers: {
