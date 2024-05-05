@@ -12,10 +12,7 @@ interface AuthContextData {
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    const authState = window.localStorage.getItem('isAuthenticated');
-    return authState ? JSON.parse(authState) : false;
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { push } = useRouter();
 
   const login = async (username: string, password: string) => {
