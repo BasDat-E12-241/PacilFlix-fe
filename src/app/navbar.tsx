@@ -17,7 +17,6 @@ function NavLink({ href, isActive, children }) {
 export default function Navbar() {
   const pathname = usePathname();
 
-  // Change this to get different navbar
   const { isAuthenticated, logout } = useAuth();
 
   function handleLogout() {
