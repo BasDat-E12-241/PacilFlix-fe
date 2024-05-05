@@ -22,7 +22,7 @@
     return (
         <div className="container mx-auto pt-8">
             <h1 className="text-center text-4xl my-8">Halaman Beli</h1>
-            <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <form onSubmit={handleSubmit} className="bg-primary shadow-md rounded px-8 pt-6 pb-8 mb-4">
                 <h2 className="text-xl font-bold my-4">Informasi Paket yang ingin Dibeli:</h2>
                 <table className="w-full my-4 text-left border-collapse border border-gray-400">
                 <tbody>
