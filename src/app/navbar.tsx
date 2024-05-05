@@ -2,6 +2,7 @@
 
 import React from "react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 function NavLink({ href, isActive, children }) {
   return (
@@ -12,6 +13,20 @@ function NavLink({ href, isActive, children }) {
     </li>
   );
 }
+
+
+// function NavLink({ href, isActive, children }) {
+//   return (
+//     <li>
+//       <Link href={href} legacyBehavior={false}>
+//         <a className={`transition-all px-3 py-1 rounded-full ${isActive ? "active font-bold bg-red-primary hover:opacity-70" : "hover:text-red-primary"}`}>
+//           {children}
+//         </a>
+//       </Link>
+//     </li>
+//   );
+// }
+
 
 export default function Navbar() {
   const pathname = usePathname();
