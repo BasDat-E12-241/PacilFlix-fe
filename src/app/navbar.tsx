@@ -32,12 +32,12 @@ export default function Navbar() {
   const pathname = usePathname();
 
   // Change this to get different navbar
-  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+  const [isLoggedIn, setIsLoggedIn] = React.useState(true);
 
   return (
     <nav className="flex gap-16 px-8 py-4 items-center bg-primary fixed w-full left-0">
       <a className="font-semibold text-2xl text-red-primary" href="/">PacilFlix</a>
-      {isLoggedIn ? 
+      {!isLoggedIn ? 
         <div className="justify-between flex w-full">
           <div>
             <ul className="flex gap-4">
