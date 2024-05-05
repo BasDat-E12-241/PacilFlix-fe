@@ -2,11 +2,13 @@
 
 import React from "react";
 import { useState } from "react";
+import { useRouter } from 'next/navigation';
 
 export default function Register() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [negaraAsal, setNegaraAsal] = useState("");
+  const { push } = useRouter();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -14,16 +16,19 @@ export default function Register() {
     fetch('/api/auth/register', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+      'Content-Type': 'application/json',
       },
       body: JSON.stringify({ 
-        username, 
-        password, 
-        negara_asal: negaraAsal 
+      username, 
+      password, 
+      negara_asal: negaraAsal 
       }),
     })
     .then(response => response.json())
-    .then(data => alert(data.message))
+    .then(data => {
+      alert(data.message);
+      push('/login');
+    })
     .catch(error => alert(error.message));
   }
 

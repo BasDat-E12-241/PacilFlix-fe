@@ -2,27 +2,18 @@
 
 import React from "react";
 import { useState } from "react";
+import { useAuth } from "../contexts/authContext";
 
 export default function Register() {
+  const { login } = useAuth();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    fetch('/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ 
-        username, 
-        password 
-      }),
-    })
-    .then(response => response.json())
-    .then(data => alert(data.message))
-    .catch(error => alert(error.message));
+    login(username, password)
   }
 
   return (
