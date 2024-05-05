@@ -161,7 +161,7 @@ const seriestayangan = [
 ];
 
 export default function Tayangan() {
-    const [isActive, setIsActive] = useState(false);
+    const [isActive, setIsActive] = useState(true);
     const [country, setCountry] = useState("Indonesia");
     const pathname = usePathname();
 
@@ -273,7 +273,6 @@ export default function Tayangan() {
                     <table className="w-full my-4 text-left border-collapse border border-gray-400">
                         <thead>
                             <tr>
-                                <th className="border border-gray-300 px-4 py-2">Peringkat</th>
                                 <th className="border border-gray-300 px-4 py-2">Judul</th>
                                 <th className="border border-gray-300 px-4 py-2">Sinopsis Tayangan</th>
                                 <th className="border border-gray-300 px-4 py-2">URL Tayangan</th>
@@ -284,7 +283,6 @@ export default function Tayangan() {
                         <tbody>
                             {filmtayangan.map((Tayangan, index) => (
                                 <tr key={index}>
-                                    <td className="border border-gray-300 text-center px-4 py-2">{Tayangan.peringkat}</td>
                                     <td className="border border-gray-300 px-4 py-2">{Tayangan.judul}</td>
                                     <td className="border border-gray-300 px-4 py-2">{Tayangan.sinopsis}</td>
                                     <td className="border border-gray-300 px-4 py-2"><a href={Tayangan.url} className="text-blue-500" target="_blank" rel="noopener noreferrer">Lihat Tayangan</a></td>
@@ -305,7 +303,6 @@ export default function Tayangan() {
                     <table className="w-full my-4 text-left border-collapse border border-gray-400">
                         <thead>
                             <tr>
-                                <th className="border border-gray-300 px-4 py-2">Peringkat</th>
                                 <th className="border border-gray-300 px-4 py-2">Judul</th>
                                 <th className="border border-gray-300 px-4 py-2">Sinopsis Tayangan</th>
                                 <th className="border border-gray-300 px-4 py-2">URL Tayangan</th>
@@ -316,7 +313,6 @@ export default function Tayangan() {
                         <tbody>
                             {seriestayangan.map((Tayangan, index) => (
                                 <tr key={index}>
-                                    <td className="border border-gray-300 text-center px-4 py-2">{Tayangan.peringkat}</td>
                                     <td className="border border-gray-300 px-4 py-2">{Tayangan.judul}</td>
                                     <td className="border border-gray-300 px-4 py-2">{Tayangan.sinopsis}</td>
                                     <td className="border border-gray-300 px-4 py-2"><a href={Tayangan.url} className="text-blue-500" target="_blank" rel="noopener noreferrer">Lihat Tayangan</a></td>
