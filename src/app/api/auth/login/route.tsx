@@ -11,7 +11,7 @@ export async function POST(req: Request) {
 
   if (rows.length > 0) {
     return Response.json(
-      { message: 'Login berhasil' },
+      { message: 'Login berhasil', username: rows[0].username, negara_asal: rows[0].negara_asal },
       { status: 200 }
     );
   } else {

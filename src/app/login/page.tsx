@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useState } from "react";
-import { useAuth } from "../contexts/authContext";
+import { useAuth } from "@/app/contexts/authContext";
 
 export default function Register() {
   const { login } = useAuth();
