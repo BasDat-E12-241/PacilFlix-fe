@@ -6,8 +6,8 @@ import { useAuth } from "./contexts/authContext";
 
 function NavLink({ href, isActive, children }) {
   return (
-    <li className={`${isActive ? "active" : "" }`}>
-      <a className={`transition-all px-3 py-1 rounded-full ${isActive ? "active font-bold bg-red-primary hover:opacity-70" : "hover:text-red-primary"} `} href={href}>
+    <li className={`flex text-center items-center transition-all px-3 py-1 rounded-full ${isActive ? "active font-bold bg-red-primary hover:opacity-70" : "hover:text-red-primary"}`}>
+      <a href={href}>
         {children}
       </a>
     </li>
@@ -59,7 +59,7 @@ export default function Navbar() {
               </NavLink>
             </ul>
           </div>
-          <div className="border-2 border-red-primary px-4 rounded-full hover:cursor-pointer transition-all hover:scale-110 hover:bg-red-primary active:scale-95 active:brightness-75" onClick={handleLogout}>
+          <div className="flex text-center items-center font-bold border-2 border-red-primary px-4 rounded-full hover:cursor-pointer transition-all hover:scale-110 hover:bg-red-primary active:scale-95 active:brightness-75" onClick={handleLogout}>
             Logout
           </div>
         </div>
