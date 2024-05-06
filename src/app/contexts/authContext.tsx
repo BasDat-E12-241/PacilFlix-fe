@@ -15,6 +15,13 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  useEffect(() => {
+    const authLocal = window.localStorage.getItem('isAuthenticated');
+    if (authLocal) {
+      setIsAuthenticated(JSON.parse(authLocal));
+    }
+  }, []);
+
   const [username, setUsername] = useState('');
   const [negaraAsal, setNegaraAsal] = useState('');
   const { push } = useRouter();
@@ -47,10 +54,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     window.localStorage.setItem('isAuthenticated', 'false');
     push('/');
   };
-
-  useEffect(() => {
-    window.localStorage.setItem('isAuthenticated', JSON.stringify(isAuthenticated));
-  }, [isAuthenticated]);
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, username, negaraAsal, login, logout }}>
