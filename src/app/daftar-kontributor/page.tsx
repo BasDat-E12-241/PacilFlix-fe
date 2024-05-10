@@ -1,29 +1,33 @@
-"use client";
-
-import React, { useState } from 'react';
+'use client'
+import React, { useState, useEffect } from 'react';
 import Navbar from '../navbar';
 
-
-const contributors = [
-  { nama: 'John Doe', tipe: 'Sutradara', jenisKelamin: 'Laki-laki', kewarganegaraan: 'Indonesia' },
-  { nama: 'Jane Smith', tipe: 'pemain', jenisKelamin: 'Perempuan', kewarganegaraan: 'US' },
-  { nama: 'Juan Perez', tipe: 'penulis skenario', jenisKelamin: 'Laki-laki', kewarganegaraan: 'Spain' }
-];
+type Contributor = {
+  nama: string;
+  kewarganegaraan: string;
+  jenis_kelamin: number;
+  tipe: string;
+}
 
 export default function DaftarKontributor() {
+  const [contributors, setContributors] = useState<Contributor[]>([]);
+  const [filter, setFilter] = useState('all');
 
-  const [searchTerm, setSearchTerm] = useState('');
+  useEffect(() => {
+    async function fetchContributors() {
+      console.log("filter = ",filter);
+      const response = await fetch(`/api/contributors/${(filter)}`);
+      const data = await response.json();
+      setContributors(data);
+    }
+    fetchContributors();
 
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
+  }, [filter])
+  
+
+  const handleFilterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setFilter(event.target.value);
   };
-
-  const filteredContributors = contributors.filter(contributor =>
-    contributor.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    contributor.tipe.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    contributor.jenisKelamin.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    contributor.kewarganegaraan.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <>
@@ -31,22 +35,24 @@ export default function DaftarKontributor() {
       <div className="container mx-auto pt-24"> 
         <h1 className="text-center text-4xl my-8">Daftar Kontributor</h1>
         <div className='flex justify-center my-4'>
-          <input
-              type="text"
-              placeholder="Search"
-              value={searchTerm}
-              onChange={handleSearchChange}
-              className="p-2 shadow rounded border-0 "
-              style={{ width: '300px' }} 
-          />
-
+          <select
+            onChange={handleFilterChange}
+            value={filter}
+            className="p-2 shadow rounded border-0 bg-gray-600"
+            style={{ width: '200px' }}
+          >
+            <option value="all">All</option>
+            <option value="pemain">Pemain</option>
+            <option value="sutradara">Sutradara</option>
+            <option value="penulis_skenario">Penulis Skenario</option>
+          </select>
         </div>
         <div className="overflow-x-auto">
           <table className="table-auto w-full">
             <thead className="border-b">
               <tr>
                 <th className="px-4 py-2">Nama</th>
-                <th className="px-4 py-2">Tipe</th>
+                <th className="px-4 py-2">tipe</th>
                 <th className="px-4 py-2">Jenis Kelamin</th>
                 <th className="px-4 py-2">Kewarganegaraan</th>
               </tr>
@@ -55,8 +61,8 @@ export default function DaftarKontributor() {
               {contributors.map((contributor, index) => (
                 <tr key={index} className="border-b">
                   <td className="px-4 py-2">{contributor.nama}</td>
-                  <td className="px-4 py-2">{contributor.tipe}</td>
-                  <td className="px-4 py-2">{contributor.jenisKelamin}</td>
+                  <td className="px-4 py-2">{contributor.tipe }</td>
+                  <td className="px-4 py-2">{contributor.jenis_kelamin == 0 ? "laki-laki" : "perempuan" }</td>
                   <td className="px-4 py-2">{contributor.kewarganegaraan}</td>
                 </tr>
               ))}
