@@ -15,16 +15,25 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  useEffect(() => {
-    const authLocal = window.localStorage.getItem('isAuthenticated');
-    if (authLocal) {
-      setIsAuthenticated(JSON.parse(authLocal));
-    }
-  }, []);
-
   const [username, setUsername] = useState('');
   const [negaraAsal, setNegaraAsal] = useState('');
   const { push } = useRouter();
+
+  useEffect(() => {
+    const authLocal = window.localStorage.getItem('isAuthenticated');
+    const usernameLocal = window.localStorage.getItem('username');
+    const negaraAsalLocal = window.localStorage.getItem('negaraAsal');
+    if (authLocal) {
+      setIsAuthenticated(JSON.parse(authLocal));
+    }
+    if (usernameLocal) {
+      setUsername(usernameLocal);
+    }
+    if (negaraAsalLocal) {
+      setNegaraAsal(negaraAsalLocal);
+    }
+  }, []);
+
 
   const login = async (username: string, password: string) => {
     const response = await fetch('/api/auth/login', {
@@ -38,8 +47,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const data = await response.json();
 
     if (response.ok) {
-      setIsAuthenticated(true);
       window.localStorage.setItem('isAuthenticated', 'true');
+      window.localStorage.setItem('username', data.username);
+      window.localStorage.setItem('negaraAsal', data.negara_asal);
+      setIsAuthenticated(true);
       setUsername(data.username);
       setNegaraAsal(data.negara_asal);
       alert('Login berhasil');
@@ -52,6 +63,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     setIsAuthenticated(false);
     window.localStorage.setItem('isAuthenticated', 'false');
+    setUsername('');
+    window.localStorage.setItem('username', '');
+    setNegaraAsal('');
+    window.localStorage.setItem('negaraAsal', '');
     push('/');
   };
 
