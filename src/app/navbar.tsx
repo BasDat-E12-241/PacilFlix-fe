@@ -17,7 +17,7 @@ function NavLink({ href, isActive, children }) {
 export default function Navbar() {
   const pathname = usePathname();
 
-  const { isAuthenticated, logout } = useAuth();
+  const { username,isAuthenticated, logout } = useAuth();
 
   const [isLoaded, setIsLoaded] = useState(false);
   useEffect(() => {
@@ -31,6 +31,7 @@ export default function Navbar() {
 
   return (
     <nav className="flex gap-16 px-8 py-4 items-center bg-primary fixed w-full left-0">
+      {username}
       <a className="font-semibold text-2xl text-red-primary" href="/">PacilFlix</a>
       {isLoaded &&
         <>

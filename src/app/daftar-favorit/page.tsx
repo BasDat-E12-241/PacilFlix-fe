@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import Navbar from '../navbar';
+import { useAuth } from '../contexts/authContext';
 
 const favorites = [
   { judul: 'Judul Favorit 1', waktu: '2024-04-01', id: 1 },
@@ -9,6 +10,8 @@ const favorites = [
 ];
 
 export default function DaftarFavorit() {
+  const{ username , isAuthenticated, negaraAsal } = useAuth();
+  console.log(username);
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleSearchChange = (event) => {
