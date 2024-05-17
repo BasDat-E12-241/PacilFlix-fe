@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation'; // Assuming this hook is available and works similar to React Router
+import { useParams } from 'next/navigation'; 
 import { useAuth } from "../../contexts/authContext";
 import { revalidateTag } from 'next/cache';
 export default function HalamanBeli() {
     const{ username , isAuthenticated, negaraAsal } = useAuth();
     const params = useParams();
-    const { tipe} = params; // Destructure parameters directly from params
+    const { tipe} = params; 
     console.log(tipe);
     const [packageDetails, setPackageDetails] = useState({
         nama: '',
@@ -17,7 +17,6 @@ export default function HalamanBeli() {
     });
     const [paymentMethod, setPaymentMethod] = useState('transfer');
 
-    // Fetch package details from the API
     useEffect(() => {
         if (tipe) {
             const fetchData = async () => {
@@ -36,12 +35,6 @@ export default function HalamanBeli() {
         }
     }, [tipe]);
 
-    // const handleSubmit = (event) => {
-    //     event.preventDefault();
-    //     // Implement your logic to handle the purchase/payment
-    //     console.log('Payment method:', paymentMethod);
-    //     // Redirect to confirmation page or show a success message
-    // };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
