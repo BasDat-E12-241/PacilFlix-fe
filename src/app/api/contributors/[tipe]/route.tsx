@@ -1,5 +1,6 @@
 import { sql } from '@vercel/postgres';
 import { useParams } from 'next/navigation';
+import { revalidateTag, unstable_noStore as noStore} from 'next/cache';
 
 export async function GET(
   request: Request,
@@ -8,7 +9,7 @@ export async function GET(
 
   // console.log("Query parameters:", params.tipe); 
   const tipe = params.tipe;
-
+  noStore();
   try {
     let query;
     if(tipe === 'all'){

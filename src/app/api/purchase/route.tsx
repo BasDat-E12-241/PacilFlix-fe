@@ -17,11 +17,13 @@
 //     }
 // }
 
+import { revalidateTag, unstable_noStore as noStore} from 'next/cache';
 import { useAuth } from '../../contexts/authContext';
 import { sql } from '@vercel/postgres';
 export async function POST(req: Request) {
     const { nama_paket, paymentMethod, harga,username } = await req.json();
     console.log(nama_paket,paymentMethod,harga,username);
+    noStore()
     
     const { rows } = await sql`
     INSERT INTO TRANSACTION(
@@ -41,7 +43,8 @@ export async function POST(req: Request) {
       )
       RETURNING * 
   `;
-
+  console.log("masuk");
+  revalidateTag("aktif");
   if (rows.length > 0) {
     return Response.json(
       { message: ' berhasil create' },
@@ -50,7 +53,7 @@ export async function POST(req: Request) {
   } else {
     return Response.json(
       { message: `berhasil update` },
-      { status: 404 }
+      { status: 201 }
     );
   }
 }

@@ -62,7 +62,11 @@ export default function LanggananPage() {
     if (username) {
       const fetchAktif = async () => {
         try {
-          const response = await fetch(`/api/aktif/${username}`);
+          const response = await fetch(`/api/aktif/${username}?timestamp=${new Date().getTime()}`,{
+            next:{
+              tags:["aktif"],
+            }
+          });
           const data = await response.json();
           setAktif(data);
         } catch (error) {
@@ -111,7 +115,11 @@ export default function LanggananPage() {
     if (username) {
       const fetchTransactionHistory = async () => {
         try {
-          const response = await fetch(`/api/transactions/${username}`);
+          const response = await fetch(`/api/transactions/${username}?timestamp=${new Date().getTime()}`,{
+            next:{
+              tags:["aktif"],
+            }
+          });
           const data = await response.json();
           setTransactionHistory(data);
         } catch (error) {
@@ -121,9 +129,6 @@ export default function LanggananPage() {
   
       fetchTransactionHistory();
   
-      const intervalId = setInterval(fetchTransactionHistory, 5000);// tiap 5 detik 
-  
-      return () => clearInterval(intervalId);
     }
   }, [username]);
 

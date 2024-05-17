@@ -1,9 +1,11 @@
 import { sql } from '@vercel/postgres';
 import { useParams } from 'next/navigation';
+import { revalidateTag, unstable_noStore as noStore} from 'next/cache';
 
 export async function GET(
   request: Request,
 ) {
+  noStore();
   try {
     let query;
     // query = await sql`

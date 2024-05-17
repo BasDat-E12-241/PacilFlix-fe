@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation'; // Assuming this hook is available and works similar to React Router
 import { useAuth } from "../../contexts/authContext";
+import { revalidateTag } from 'next/cache';
 export default function HalamanBeli() {
     const{ username , isAuthenticated, negaraAsal } = useAuth();
     const params = useParams();
@@ -67,6 +68,7 @@ export default function HalamanBeli() {
     
             const data = await response.json();
             if (response.ok) {
+                
                 alert('Purchase successful!');
             } else {
                 throw new Error(data.message || 'Something went wrong');
