@@ -1,7 +1,9 @@
 'use client'
 
+import { useAuth } from "@/app/contexts/authContext";
 import React, { useState, useEffect } from "react";
 import { AiFillStar, AiOutlineStar } from 'react-icons/ai';
+import { useRouter } from 'next/navigation';
 
 type FilmTayangan = {
   judul: string;
@@ -9,7 +11,6 @@ type FilmTayangan = {
   tanggalRilis: string;
   totalViews: number;
   durasi: number;
-  rating: number;
   negara: string;
   sinopsis: string;
   genre: string[];
@@ -18,27 +19,21 @@ type FilmTayangan = {
   sutradara: string[];
 };
 
-const Ulasan = [
-  {
-    username: "username 1",
-    deskripsi: "Lorem ipsum dolor sit amet consectetur. Imperdiet risus imperdiet sit sed lectus nisl congue at. Id imperdiet nibh eget magna augue pellentesque fringilla amet.",
-    rating: "9"
-  },
-  {
-    username: "username 2",
-    deskripsi: "Lorem ipsum dolor sit amet consectetur. Imperdiet risus imperdiet sit sed lectus nisl congue at. Id imperdiet nibh eget magna augue pellentesque fringilla amet.",
-    rating: "4"
-  },
-  {
-    username: "username 3",
-    deskripsi: "Lorem ipsum dolor sit amet consectetur. Imperdiet risus imperdiet sit sed lectus nisl congue at. Id imperdiet nibh eget magna augue pellentesque fringilla amet.",
-    rating: "7"
-  }
-];
+type Ulasan = {
+  id_tayangan: string;
+  username: string;
+  timestamp: string;
+  rating: number;
+  deskripsi: string;
+};
 
 export default function DetailsFilm({ params }: { params: { id: string } }) {
+  const { username, isAuthenticated, negaraAsal } = useAuth();
   const [rating, setRating] = useState(0); // State untuk menyimpan rating yang dipilih
+  const [ulasan, setUlasan] = useState("");
   const [filmData, setFilmData] = useState<FilmTayangan>(); // Menggunakan tipe FilmTayangan atau undefined
+  const [ulasanGet, setUlasanGet] = useState<Ulasan[]>([]);
+  const { push } = useRouter();
 
   const idTayangan = params.id; // Menggunakan searchParams.id
 
@@ -58,7 +53,6 @@ export default function DetailsFilm({ params }: { params: { id: string } }) {
           tanggalRilis: data[0].release_date_film,
           totalViews: data[0].total_views,
           durasi: data[0].durasi_film,
-          rating: 0, 
           negara: data[0].asal_negara,
           sinopsis: data[0].sinopsis,
           genre: data[0].list_genre ? data[0].list_genre.split(", ") : null,
@@ -79,18 +73,63 @@ export default function DetailsFilm({ params }: { params: { id: string } }) {
   const handleRatingClick = (index: number) => {
     setRating(index + 1);
   };
+  
+  const handleRatingSubmit = () => {
+    fetch('/api/ulasan', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id_tayangan: idTayangan,
+        username,
+        rating,
+        deskripsi: ulasan,
+      }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        alert(data.message);
+        push('/daftar-tayangan');
+      })
+      .catch(error => alert(error.message));
+  };
 
-  const UlasanCard = ({ username, deskripsi, rating }: { username: string, deskripsi: string, rating: string }) => {
+  useEffect(() => {
+    async function fetchDataUlasan() {
+      try {
+        console.log("ini idnya", idTayangan);
+        if (idTayangan) {
+          const response = await fetch(`/api/mendapatkan-ulasan/${idTayangan}`);
+          if (!response.ok) {
+            throw new Error('Gagal mengambil data dari server');
+          }
+          const data = await response.json();
+          console.log("data ulasan", data);
+          setUlasanGet(data);
+        } else {
+          console.log("idTayangan is not available");
+        }
+      } catch (error) {
+        console.error('Error:', error.message);
+      }
+    }
+
+    fetchDataUlasan();
+  }, [idTayangan]);
+
+  const UlasanCard = ({ username, deskripsi, rating }: { username: string, deskripsi: string, rating: number }) => {
     return (
       <div className="bg-white rounded-lg shadow-md p-6 mb-4 w-[790px]">
         <h2 className="text-xl text-red-primary font-semibold mb-2">{username}</h2>
         <p className="text-gray-600 mb-4">{deskripsi}</p>
         <div className="flex items-center">
           <p className="text-gray-600 mr-2">Rating:</p>
-          {[...Array(parseInt(rating))].map((_, index) => (
+          {[...Array(rating)].map((_, index) => (
             <AiFillStar key={index} color="red" size={24} />
           ))}
-          {[...Array(10 - parseInt(rating))].map((_, index) => (
+          {[...Array(10 - rating)].map((_, index) => (
             <AiOutlineStar key={index} color="red" size={24} />
           ))}
         </div>
@@ -144,7 +183,7 @@ export default function DetailsFilm({ params }: { params: { id: string } }) {
         <label className="flex flex-col gap-2 mr-4">
           <span className="font-semibold">Rating Rata-Rata</span>
           <div className="border-4 transition-all border-solid rounded-lg px-3 py-1.5 w-64 bg-white text-black focus:border-red-primary overflow-hidden">
-            {filmData?.rating}
+            {rating}
           </div>
         </label>
         <label className="flex flex-col gap-2 mr-4">
@@ -229,20 +268,26 @@ export default function DetailsFilm({ params }: { params: { id: string } }) {
           </span>
         ))}
       </div>
-      <label className="flex flex-col gap-2">
-        <input
-          type="text"
-          placeholder="Ulasan"
-          required
-          className="border-4 transition-all border-solid rounded-lg px-3 py-1.5 w-[380px] bg-white text-black focus:border-red-primary"
-        />
-      </label>
-      <button type="submit" className="hover:scale-105 active:scale-95 active:opacity-70 transition-all bg-red-primary w-28 justify-center flex rounded-lg py-1.5 font-semibold">
-        Submit
-      </button>
+      <form onSubmit={(event) => {
+        event.preventDefault();
+        handleRatingSubmit();
+      }}>
+        <label className="flex flex-col gap-2">
+          <input
+            type="ulasan"
+            placeholder="Ulasan"
+            required
+            className="border-4 transition-all border-solid rounded-lg px-3 py-1.5 w-64 bg-white text-black focus:border-red-primary"
+            onChange={(event) => setUlasan(event.target.value)}
+          />
+        </label>
+        <button type="submit" className="hover:scale-105 active:scale-95 active:opacity-70 transition-all bg-red-primary w-28 justify-center flex rounded-lg py-1.5 font-semibold">
+          Submit
+        </button>
+      </form>
       <div className="flex mt-4">
         <div>
-          {Ulasan.map((ulasan, index) => (
+          {ulasanGet.map((ulasan, index) => (
             <UlasanCard
               key={index}
               username={ulasan.username}
