@@ -3,23 +3,42 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../navbar';
 import { useAuth } from '@/app/contexts/authContext';
 
+interface Favorite {
+  id: number;
+  judul: string;
+  waktu: string;
+}
+
 export default function DaftarFavorit() {
-  const [favorites, setFavorites] = useState([
-    { judul: 'Judul Favorit 1', waktu: '2024-04-01', id: 1 },
-    { judul: 'Judul Favorit 2', waktu: '2024-04-15', id: 2 },
-    { judul: 'Judul Favorit 3', waktu: '2024-04-20', id: 3 },
-  ]);
+  const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredFavorites, setFilteredFavorites] = useState(favorites);
+  const [filteredFavorites, setFilteredFavorites] = useState<Favorite[]>([]);
 
   const { username } = useAuth();
 
   useEffect(() => {
+    async function fetchData() {
+      if (username) {
+        const response = await fetch(`/api/favorites?username=${username}`);
+        if (response.ok) {
+          const data: Favorite[] = await response.json();
+          setFavorites(data);
+          setFilteredFavorites(data);
+        } else {
+          console.error('Failed to fetch favorites');
+        }
+      }
+    }
+    fetchData();
+  }, [username]);
+
+  useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      setFilteredFavorites(favorites.filter(favorite =>
+      const filtered = favorites.filter(favorite =>
         favorite.judul.toLowerCase().includes(searchTerm.toLowerCase())
-      ));
-    }, 300); // Delay 300 ms
+      );
+      setFilteredFavorites(filtered);
+    }, 300);
 
     return () => clearTimeout(delayDebounce);
   }, [searchTerm, favorites]);
@@ -29,10 +48,10 @@ export default function DaftarFavorit() {
   };
 
   const handleDelete = (id) => {
-    setFavorites(favorites.filter(favorite => favorite.id !== id));
+    const newFavorites = favorites.filter(favorite => favorite.id !== id);
+    setFavorites(newFavorites);
+    setFilteredFavorites(newFavorites);
   };
-
-
 
   return (
     <>
@@ -40,14 +59,14 @@ export default function DaftarFavorit() {
       <div className="container mx-auto pt-24">
         <h1 className="text-center text-4xl my-8">Daftar Favorit {username}</h1>
         <div className='flex justify-center my-4'>
-        <input
-          type="text"
-          placeholder="Search"
-          value={searchTerm}
-          onChange={handleSearchChange}
-          className="p-2 shadow rounded border-0 text-black bg-white"  // Tambahkan kelas untuk warna teks dan latar
-          style={{ width: '300px' }}
-        />
+          <input
+            type="text"
+            placeholder="Search"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="p-2 shadow rounded border-0 text-black bg-white"
+            style={{ width: '300px' }}
+          />
         </div>
         <div className="overflow-x-auto">
           <table className="table-auto w-full">
@@ -62,12 +81,8 @@ export default function DaftarFavorit() {
               {filteredFavorites.length > 0 ? filteredFavorites.map((favorite) => (
                 
                 <tr key={favorite.id} className="border-b">
-                  <td className="flex justify-center">{favorite.judul}</td>
-                  <td className="px-4 py-2">
-                    <div className="flex justify-center">
-                      {favorite.waktu}
-                    </div>
-                  </td>
+                  <td className="px-4 py-2">{favorite.judul}</td>
+                  <td className="px-4 py-2">{favorite.waktu}</td>
                   <td className="px-4 py-2">
                     <div className="flex justify-center">
                       <button

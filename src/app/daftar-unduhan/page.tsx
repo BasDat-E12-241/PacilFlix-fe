@@ -1,37 +1,56 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import Navbar from '../navbar';
 import { useAuth } from '@/app/contexts/authContext';
 
+interface Download {
+  id: number;
+  judul: string;
+  waktu: string;
+}
+
 export default function DaftarUnduhan() {
-  const [downloads, setDownloads] = useState([
-    { judul: 'The Walking Dead', waktu: '2024-04-30', id: 1 },
-    { judul: 'Siksa Kubur', waktu: '2024-04-29', id: 2 },
-    { judul: 'The Adam Project', waktu: '2024-04-28', id: 3 },
-  ]);
+  const [downloads, setDownloads] = useState<Download[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredDownloads, setFilteredDownloads] = useState(downloads);  // Tanda perubahan: Nama variabel disesuaikan
+  const [filteredDownloads, setFilteredDownloads] = useState<Download[]>([]);
 
   const { username } = useAuth();
 
   useEffect(() => {
+    async function fetchData() {
+      if (username) {
+        const response = await fetch(`/api/downloads?username=${username}`);
+        if (response.ok) {
+          const data: Download[] = await response.json();
+          setDownloads(data);
+          setFilteredDownloads(data);
+        } else {
+          console.error('Failed to fetch downloads');
+        }
+      }
+    }
+    fetchData();
+  }, [username]);
+
+  useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      setFilteredDownloads(downloads.filter(download =>
+      const filtered = downloads.filter(download =>
         download.judul.toLowerCase().includes(searchTerm.toLowerCase())
-      ));
-    }, 300); // Delay 300 ms
+      );
+      setFilteredDownloads(filtered);
+    }, 300);
 
     return () => clearTimeout(delayDebounce);
-  }, [searchTerm, downloads]);  // Tanda perubahan: Efisiensi dalam filter dan debounce
-  
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value); // Tanda perubahan: Menangani perubahan search
+  }, [searchTerm, downloads]);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
   };
 
-  const handleDelete = (id) => {
-    const newDownloads = downloads.filter(download => download.id !== id); // Tanda perubahan: Update state dengan cara yang benar
+  const handleDelete = (id: number) => {
+    const newDownloads = downloads.filter(download => download.id !== id);
     setDownloads(newDownloads);
-    setFilteredDownloads(newDownloads); // Pastikan filtered list juga diperbarui
+    setFilteredDownloads(newDownloads);
   };
 
   return (
@@ -60,26 +79,21 @@ export default function DaftarUnduhan() {
             </thead>
             <tbody>
             {filteredDownloads.length > 0 ? filteredDownloads.map((download) => (
-              // {filteredDownloads.map((download) => (
-                <tr key={download.id} className="border-b">
-                  <td className="flex justify-center">{download.judul}</td>
-                  <td className="px-4 py-2">
-                    <div className="flex justify-center">
-                      {download.waktu}
-                    </div>
-                  </td>
-                  <td className="px-4 py-2">
-                    <div className="flex justify-center">
-                      <button
-                        onClick={() => handleDelete(download.id)}
-                        className="text-white bg-red-500 hover:bg-red-700 px-4 py-2 rounded focus:outline-none"
-                      >
-                        Hapus
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              )): <tr><td colSpan={3} className="text-center py-4">Tidak ada item yang ditemukan</td></tr>}
+              <tr key={download.id} className="border-b">
+                <td className="px-4 py-2">{download.judul}</td>
+                <td className="px-4 py-2">{download.waktu}</td>
+                <td className="px-4 py-2">
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() => handleDelete(download.id)}
+                      className="text-white bg-red-500 hover:bg-red-700 px-4 py-2 rounded focus:outline-none"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            )) : <tr><td colSpan={3} className="text-center py-4">Tidak ada item yang ditemukan</td></tr>}
             </tbody>
           </table>
         </div>
