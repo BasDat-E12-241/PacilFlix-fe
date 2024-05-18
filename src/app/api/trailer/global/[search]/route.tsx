@@ -62,12 +62,15 @@ export async function GET(
                     td.id = rn.id_tayangan
                         AND
                     rn.durasi_menonton >= (0.7 * td.durasi)
+            WHERE
+                td.judul = ${params.search}
             GROUP BY
                 td.id, td.judul, td.sinopsis, td.url_video_trailer, td.release_date_trailer
             ORDER BY
                 total_view DESC,
                 td.release_date_trailer ASC;
         `;
+
         const { rows: trailer_globals } = await query;
         return Response.json(trailer_globals, { status: 200 });
     } catch (error) {
