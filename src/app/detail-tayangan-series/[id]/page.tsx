@@ -46,13 +46,15 @@ function DetailEpisodeLink({ href, isActive, children }) {
 
 
 export default function DetailsSeries({ params }: { params: { id: string } }) {
+  const router = useRouter();
   const pathname = usePathname();
   const { username, isAuthenticated, negaraAsal } = useAuth();
   const [ulasan, setUlasan] = useState("");
   const [rating, setRating] = useState(0); // State untuk menyimpan rating yang dipilih
   const [showModalFavorit, setShowModalFavorit] = useState(false); // Set nilai boolean dari modalfavorit
   const [showModalUnduhan, setShowModalUnduhan] = useState(false); // Set nilai boolean dari modalUnduhan
-  const [filmData, setFilmData] = useState<SeriesTayangan>();
+  const [filmData, setFilmData] = useState<SeriesTayangan>(); 
+  const [unduhMessage, setUnduhMessage] = useState(''); // Menyimpan pesan unduhan
   const [ulasanGet, setUlasanGet] = useState<Ulasan[]>([]);
   const [rataRataRating, setRataRataRating] = useState(0);
   const { push } = useRouter();
@@ -94,10 +96,11 @@ export default function DetailsSeries({ params }: { params: { id: string } }) {
     fetchData();
   }, [idTayangan]);
 
+  // Fungsi untuk menetapkan rating saat bintang diklik
   const handleRatingClick = (index: number) => {
     setRating(index + 1);
   };
-  
+
   const handleRatingSubmit = () => {
     fetch('/api/ulasan', {
       method: 'POST',
@@ -157,6 +160,34 @@ export default function DetailsSeries({ params }: { params: { id: string } }) {
     fetchDataUlasan();
   }, [idTayangan]);
 
+  
+
+  const handleDownload = async () => {
+    try {
+      const response = await fetch('/api/addDownload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id_tayangan: idTayangan, username: 'pengguna' }), // Ganti 'pengguna' dengan username yang sesuai
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUnduhMessage(`Selamat! Anda telah berhasil mengunduh ${filmData?.judul} dan akan berlaku hingga ${new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleString()}. Cek informasi selengkapnya pada halaman daftar unduhan.`);
+        setShowModalUnduhan(true);
+      } else {
+        const errorData = await response.json();
+        setUnduhMessage(errorData.message);
+        setShowModalUnduhan(true);
+      }
+    } catch (error) {
+      console.error('Error downloading:', error);
+      setUnduhMessage('Gagal menambahkan tayangan ke daftar unduhan');
+      setShowModalUnduhan(true);
+    }
+  };
+
   const UlasanCard = ({ username, deskripsi, rating }: { username: string, deskripsi: string, rating: number }) => {
     return (
       <div className="bg-white rounded-lg shadow-md p-6 mb-4 w-[790px]">
@@ -175,7 +206,6 @@ export default function DetailsSeries({ params }: { params: { id: string } }) {
     );
   };
 
-  
   return (
     <section className="bg-primary min-h-screen flex flex-col items-center justify-center gap-4 mt-16">
       <h1 className="text-2xl font-semibold mt-10">Halaman Series</h1>
@@ -183,36 +213,19 @@ export default function DetailsSeries({ params }: { params: { id: string } }) {
       <h1 className="text-2xl font-semibold">{filmData?.judul}</h1>
       <div className="flex mt-4">
         <div
+          onClick={handleDownload}
           className={`rounded-full bg-red-primary mr-4 flex justify-center items-center p-1 w-40 hover:cursor-pointer`}
         >
-        <div
-        onClick={()=> setShowModalUnduhan(true)}
-        className={`rounded-full bg-red-primary mr-4 flex justify-center items-center p-1 w-40 hover:cursor-pointer`}
-        >
-        <span className="text-white text-base">Unduh</span>
+          <span className="text-white text-base">Unduh</span>
         </div>
-        </div>
-          <div className={`fixed inset-0 bg-black bg-opacity-0 flex justify-center items-center transition-all ${showModalUnduhan ? "scale-100" : "scale-0"}`}>
-          <div onClick={()=> setShowModalUnduhan(false)} className={`fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center transition-all ${showModalFavorit ? "scale-100" : "scale-0"}`}> 
-          </div>
-            <div className="bg-gray-800 p-5 rounded-lg shadow-2xl text-center">
-              <h2 className="text-lg font-bold text-green-500 mb-4">SUKSES MENAMBAHKAN TAYANGAN KE DAFTAR UNDUHAN!</h2>
-              
-              {/* Kotak/Card untuk teks dan tombol */}
-              <div className="bg-gray-700 p-4 rounded-lg">
-                <p className="text-white">Selamat! Anda telah berhasil mengunduh [Judul Tayangan] dan akan berlaku hingga [current time + 7 hari]. Cek informasi selengkapnya pada halaman daftar unduhan.</p>
-                <button onClick={()=> setShowModalUnduhan(false)} className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-800 focus:outline-none">Menuju Daftar Unduhan</button>
-              </div>
-            </div>
-          </div>
         <div
           onClick={()=> setShowModalFavorit(true)}
           className={`rounded-full bg-red-primary mr-4 flex justify-center items-center p-1 w-40 hover:cursor-pointer`}
         >
-        <span className="text-white text-base">Favorit</span>
+          <span className="text-white text-base">Favorit</span>
         </div>
         <div className={`fixed inset-0 bg-black bg-opacity-0 flex justify-center items-center transition-all ${showModalFavorit ? "scale-100" : "scale-0"}`}>
-          <div onClick={()=> setShowModalFavorit(false)} className={`fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center transition-all ${showModalFavorit ? "scale-100" : "scale-0"}`}> 
+          <div onClick={()=> setShowModalFavorit(false)} className={`fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center transition-all ${showModalFavorit ? "scale-100" : "scale-0"}`}>
           </div>
           <div className="bg-primary z-10">
             <div className="bg-black-800 p-5 rounded-lg shadow-2xl text-center">
@@ -264,7 +277,7 @@ export default function DetailsSeries({ params }: { params: { id: string } }) {
         <label className="flex flex-col gap-2 mr-4">
           <span className="font-semibold">Rating Rata-Rata</span>
           <div className="border-4 transition-all border-solid rounded-lg px-3 py-1.5 w-64 bg-white text-black focus:border-red-primary overflow-hidden">
-            {rataRataRating}
+          {rataRataRating}
           </div>
         </label>
         <label className="flex flex-col gap-2 mr-4">
@@ -380,6 +393,24 @@ export default function DetailsSeries({ params }: { params: { id: string } }) {
 
       </div>
 
+
+      {showModalUnduhan && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-black p-6 rounded shadow-lg text-center">
+            <h2 className="text-lg font-bold text-green-500 mb-4">SUKSES MENAMBAHKAN TAYANGAN KE DAFTAR UNDUHAN!</h2>
+            <p className="text-white mb-4">{unduhMessage}</p>
+            <button
+              onClick={() => {
+                setShowModalUnduhan(false);
+                router.push('/daftar-unduhan');
+              }}
+              className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-800 focus:outline-none"
+            >
+              Menuju Daftar Unduhan
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
