@@ -78,14 +78,6 @@ export default function DaftarFavorit() {
       <div className="container mx-auto pt-24">
         <h1 className="text-center text-4xl my-8">Daftar Favorit {username}</h1>
         <div className='flex justify-center my-4'>
-          <input
-            type="text"
-            placeholder="Search"
-            value={searchTerm}
-            onChange={handleSearchChange}
-            className="p-2 shadow rounded border-0 text-black bg-white"
-            style={{ width: '300px' }}
-          />
         </div>
         <div className="overflow-x-auto">
           <table className="table-auto w-full">
@@ -99,7 +91,7 @@ export default function DaftarFavorit() {
             <tbody>
             {filteredFavorites.length > 0 ? filteredFavorites.map((favorite, index) => (
               <tr key={index}>
-                <td className="px-4 py-2">{favorite.judul}</td>
+                <a href={`/daftar-favorit/${favorite.timestamp}/${favorite.judul}`}><td className="px-4 py-2">{favorite.judul}</td></a>
                 <td className="px-4 py-2">{new Date(favorite.timestamp).toLocaleString()}</td>
                 <td className="px-4 py-2">
                   <div className="flex justify-center">

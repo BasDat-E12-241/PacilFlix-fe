@@ -128,7 +128,6 @@ export default function DetailsEpisode({ params }: { params: { idTayangan: strin
         alert('Terjadi kesalahan saat menyimpan progress.');
       });
 
-      alert('Progress berhasil disimpan!');
       push('/daftar-tayangan');
     } else {
       alert('Terjadi kesalahan saat menyimpan progress.');
@@ -156,18 +155,8 @@ export default function DetailsEpisode({ params }: { params: { idTayangan: strin
         >
           <span className="text-white text-base">Tonton</span>
         </button>}
-        <div
-          className={`rounded-full bg-red-primary mr-4 flex justify-center items-center p-1 w-40`}
-        >
-          <span className="text-white text-base">Unduh</span>
-        </div>
-        <div
-          className={`rounded-full bg-red-primary mr-4 flex justify-center items-center p-1 w-40`}
-        >
-          <span className="text-white text-base">Favorite</span>
-        </div>
       </div>
-      <div className="flex mt-4 mt-[80px]">
+      <div className="flex mt-4">
         {Array.from({ length: filmData.length ?? 0 }, (_, index) => (
           <DetailEpisodeLink
             key={index}
@@ -192,7 +181,7 @@ export default function DetailsEpisode({ params }: { params: { idTayangan: strin
         />
         <p className="text-lg font-reguler mt-4">Progress: <span id="sliderValue">{sliderValue}</span>%</p>
       </div>
-      <div className="flex mt-4 mt-[80px]">
+      <div className="flex mt-4">
         <label className="flex flex-col gap-2 mr-4">
           <span className="font-semibold">Tanggal Rilis Series</span>
           <div className="border-4 transition-all border-solid rounded-lg px-3 py-1.5 w-64 bg-white text-black focus:border-red-primary overflow-hidden">
