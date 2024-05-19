@@ -209,7 +209,7 @@ export default function Tayangan() {
             </form>
             <div className="max-w-3xl w-full p-4 rounded-lg shadow-md mx-auto flex flex-col items-center">
                 <section>
-                    <h2 className="text-lg font-bold my-4">10 Tayangan Terbaik Minggu Ini</h2>
+                    {!search && <h2 className="text-lg font-bold my-4">10 Tayangan Terbaik Minggu Ini</h2>}
                     {!search && <div className="flex mt-4">
                         <div
                             className={`rounded-full border-2 border-red-500 mr-4 flex justify-center items-center p-1 w-56 ${isActive ? "bg-red-primary" : "border-red-500"}`}
