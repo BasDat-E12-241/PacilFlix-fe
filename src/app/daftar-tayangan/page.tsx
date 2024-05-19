@@ -1,8 +1,12 @@
+
+
+
+
 'use client'
 
-import Link from "next/link";
-import React, { useState } from "react";
 import { usePathname } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { useAuth } from "../contexts/authContext";
 
 function DetailFilmLink({ href, isActive, children }) {
     return (
@@ -32,96 +36,137 @@ function DetailSeriesLink({ href, isActive, children }) {
     );
 }
 
+type Trailer = {
+    id: string;
+    peringkat: number;
+    judul: string;
+    sinopsis: string;
+    url: string;
+    release_date_trailer: string;
+    total_view: number;
+};
 
-// Dummy data for tayangan
-const tayangan_global = [
-    {
-        peringkat: 1,
-        judul: "Judul Tayangan 1 Global",
-        sinopsis: "Sinopsis Tayangan 1",
-        url: "https://www.youtube.com/watch?v=video1",
-        tanggalRilis: "01/01/2022",
-        totalView: 10000,
-        tipe: "Series"
-    },
-    {
-        peringkat: 2,
-        judul: "Judul Tayangan 2 Global",
-        sinopsis: "Sinopsis Tayangan 2 Global",
-        url: "https://www.youtube.com/watch?v=video2",
-        tanggalRilis: "02/01/2022",
-        totalView: 15000,
-        tipe: "Film"
-    },
-    // Tambahkan Tayangan lain di sini
-];
+type GlobalTrailer = Trailer & {
+    tipe: "Film" | "Series";
+};
 
-const tayangan_country = [
-    {
-        peringkat: 1,
-        judul: "Judul Tayangan 1 Country",
-        sinopsis: "Sinopsis Tayangan 1 Country",
-        url: "https://www.youtube.com/watch?v=video1",
-        tanggalRilis: "01/01/2022",
-        totalView: 10000,
-        tipe: "Film"
-    },
-    {
-        peringkat: 2,
-        judul: "Judul Tayangan 2 Country",
-        sinopsis: "Sinopsis Tayangan 2 Country",
-        url: "https://www.youtube.com/watch?v=video2",
-        tanggalRilis: "02/01/2022",
-        totalView: 15000,
-        tipe: "Film"
-    },
-    // Tambahkan Tayangan lain di sini
-];
+type CountryTrailer = Trailer & {
+    tipe: "Film" | "Series";
+};
 
-const filmtayangan = [
-    {
-        peringkat: 1,
-        judul: "Film Tayangan 1",
-        sinopsis: "Sinopsis Film Tayangan 1",
-        url: "https://www.youtube.com/watch?v=film1",
-        tanggalRilis: "01/01/2022",
-    },
-    {
-        peringkat: 2,
-        judul: "Film Tayangan 2",
-        sinopsis: "Sinopsis Film Tayangan 2",
-        url: "https://www.youtube.com/watch?v=film2",
-        tanggalRilis: "02/01/2022",
-    },
-    // Tambahkan Tayangan film lain di sini
-];
+type FilmTrailer = Trailer;
 
-const seriestayangan = [
-    {
-        peringkat: 1,
-        judul: "Series Tayangan 1",
-        sinopsis: "Sinopsis Series Tayangan 1",
-        url: "https://www.youtube.com/watch?v=series1",
-        tanggalRilis: "01/01/2022",
-    },
-    {
-        peringkat: 2,
-        judul: "Series Tayangan 2",
-        sinopsis: "Sinopsis Series Tayangan 2",
-        url: "https://www.youtube.com/watch?v=series2",
-        tanggalRilis: "02/01/2022",
-    },
-    // Tambahkan Tayangan series lain di sini
-];
+type SeriesTrailer = Trailer;
+
+const fetchGlobalsTrailers = async () => {
+    try {
+        const response = await fetch(`/api/tayangan/global`);
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Failed to fetch global trailers:', error);
+        return [];
+    }
+};
+
+const fetchCountryTrailers = async (negaraAsal: string) => {
+    try {
+        console.log("ini negaranya", negaraAsal);
+        const response = await fetch(`/api/tayangan/country/${negaraAsal}`);
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Failed to fetch global trailers:', error);
+        return [];
+    }
+};
+
+
+const fetchFilmTrailers = async () => {
+    try {
+        const response = await fetch(`/api/tayangan/film`);
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Failed to fetch film trailers:', error);
+        return [];
+    }
+};
+
+const fetchSeriesTrailers = async () => {
+    try {
+        const response = await fetch(`/api/tayangan/series`);
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Failed to fetch series trailers:', error);
+        return [];
+    }
+};
 
 export default function Tayangan() {
+    const { username, isAuthenticated, negaraAsal } = useAuth();
     const [isActive, setIsActive] = useState(true);
-    const [country, setCountry] = useState("Indonesia");
+    const [trailersGlobal, setTrailersGlobal] = useState<GlobalTrailer[]>([]);
+    const [filmTrailers, setFilmTrailers] = useState<FilmTrailer[]>([]);
+    const [seriesTrailers, setSeriesTrailers] = useState<SeriesTrailer[]>([]);
+    const [CountryTrailers, setCountryTrailers] = useState<CountryTrailer[]>([]);
+    const [country, setCountry] = useState<string>("");
     const pathname = usePathname();
+    // const [search, setSearchValue] = useState<string>("");
+    // const [searchResults, setSearchResults] = useState<Trailer[]>([]);
+
+    useEffect(() => {
+        const loadGlobalsTrailers = async () => {
+            const data = await fetchGlobalsTrailers();
+            setTrailersGlobal(data);
+        };
+
+        loadGlobalsTrailers();
+    }, []);
+
+    useEffect(() => {
+        if (negaraAsal) {
+            const loadCountryTrailers = async () => {
+                const data = await fetchCountryTrailers(negaraAsal);
+                setCountryTrailers(data);
+            };
+
+            loadCountryTrailers();
+        }
+    }, [negaraAsal]);
+
+    useEffect(() => {
+        const loadFilmTrailers = async () => {
+            const data = await fetchFilmTrailers();
+            setFilmTrailers(data);
+        };
+
+        loadFilmTrailers();
+    }, []);
+
+    useEffect(() => {
+        const loadSeriesTrailers = async () => {
+            const data = await fetchSeriesTrailers();
+            setSeriesTrailers(data);
+        };
+
+        loadSeriesTrailers();
+    }, []);
 
     const handleGlobalButtonClick = () => {
         setIsActive(true);
     };
+
+    // Tambahkan nomor peringkat
+    trailersGlobal.forEach((trailer, index) => {
+        trailer.peringkat = index + 1;
+    });
+
+    // Tambahkan nomor peringkat
+    CountryTrailers.forEach((trailer, index) => {
+        trailer.peringkat = index + 1;
+    });
 
     const handleCountryButtonClick = () => {
         setIsActive(false);
@@ -139,7 +184,7 @@ export default function Tayangan() {
                     />
                 </label>
             </form>
-            <div className="max-w-3xl w-full p-4 rounded-lg shadow-md">
+            <div className="max-w-3xl w-full p-4 rounded-lg shadow-md mx-auto flex flex-col items-center">
                 <section>
                     <h2 className="text-lg font-bold my-4">10 Tayangan Terbaik Minggu Ini</h2>
                     <div className="flex mt-4">
@@ -153,7 +198,7 @@ export default function Tayangan() {
                             className={`rounded-full border-2 border-red-500 flex justify-center items-center p-1 w-56 ${isActive ? "border-red-500" : "bg-red-primary"}`}
                             onClick={handleCountryButtonClick}
                         >
-                            <span className="text-white text-base">Opsi Top 10 {country}</span>
+                            <span className="text-white text-base">Opsi Top 10 {negaraAsal}</span>
                         </div>
                     </div>
                     <table className="w-full my-4 text-left border-collapse border border-gray-400">
@@ -170,7 +215,7 @@ export default function Tayangan() {
                         </thead>
                         <tbody>
                             {isActive
-                                ? tayangan_global.map((Tayangan, index) => (
+                                ? trailersGlobal.map((Tayangan, index) => (
                                     <tr key={index}>
                                         <td className="border border-gray-300 text-center px-4 py-2">{Tayangan.peringkat}</td>
                                         <td className="border border-gray-300 px-4 py-2">{Tayangan.judul}</td>
@@ -180,37 +225,36 @@ export default function Tayangan() {
                                                 Lihat Tayangan
                                             </a>
                                         </td>
-                                        <td className="border border-gray-300 px-4 py-2">{Tayangan.tanggalRilis}</td>
-                                        <td className="border border-gray-300 text-center px-4 py-2">{Tayangan.totalView}</td>
+                                        <td className="border border-gray-300 px-4 py-2">{Tayangan.release_date_trailer}</td>
+                                        <td className="border border-gray-300 text-center px-4 py-2">{Tayangan.total_view}</td>
                                         <td className="border border-gray-300 px-4 py-2">
                                             {Tayangan.tipe === "Film" ? (
-                                                <DetailFilmLink href="/detail-tayangan-film" isActive={pathname === "/detail-tayangan-film"}>
+                                                <DetailFilmLink href={`/detail-tayangan-film/${Tayangan.id}`} isActive={pathname === "/detail-tayangan-film"}>
                                                     More
                                                 </DetailFilmLink>
                                             ) : (
-                                                <DetailSeriesLink href="/detail-tayangan-film" isActive={pathname === "/detail-tayangan-film"}>
+                                                <DetailSeriesLink href={`/detail-tayangan-series/${Tayangan.id}`} isActive={pathname === "/detail-tayangan-series"}>
                                                     More
                                                 </DetailSeriesLink>
                                             )}
                                         </td>
                                     </tr>
-
                                 ))
-                                : tayangan_country.map((Tayangan, index) => (
+                                : CountryTrailers.map((Tayangan, index) => (
                                     <tr key={index}>
                                         <td className="border border-gray-300 text-center px-4 py-2">{Tayangan.peringkat}</td>
                                         <td className="border border-gray-300 px-4 py-2">{Tayangan.judul}</td>
                                         <td className="border border-gray-300 px-4 py-2">{Tayangan.sinopsis}</td>
                                         <td className="border border-gray-300 px-4 py-2"><a href={Tayangan.url} className="text-blue-500" target="_blank" rel="noopener noreferrer">Lihat Tayangan</a></td>
-                                        <td className="border border-gray-300 px-4 py-2">{Tayangan.tanggalRilis}</td>
-                                        <td className="border border-gray-300 text-center px-4 py-2">{Tayangan.totalView}</td>
+                                        <td className="border border-gray-300 px-4 py-2">{Tayangan.release_date_trailer}</td>
+                                        <td className="border border-gray-300 text-center px-4 py-2">{Tayangan.total_view}</td>
                                         <td className="border border-gray-300 px-4 py-2">
                                             {Tayangan.tipe === "Film" ? (
-                                                <DetailFilmLink href="/detail-tayangan-film" isActive={pathname === "/detail-tayangan-film"}>
+                                                <DetailFilmLink href={`/detail-tayangan-film/${Tayangan.id}`} isActive={pathname === "/detail-tayangan-film"}>
                                                     More
                                                 </DetailFilmLink>
                                             ) : (
-                                                <DetailSeriesLink href="/detail-tayangan-series" isActive={pathname === "/detail-tayangan-series"}>
+                                                <DetailSeriesLink href={`/detail-tayangan-series/${Tayangan.id}`} isActive={pathname === "/detail-tayangan-series"}>
                                                     More
                                                 </DetailSeriesLink>
                                             )}
@@ -235,14 +279,14 @@ export default function Tayangan() {
                             </tr>
                         </thead>
                         <tbody>
-                            {filmtayangan.map((Tayangan, index) => (
+                            {filmTrailers.map((Tayangan, index) => (
                                 <tr key={index}>
                                     <td className="border border-gray-300 px-4 py-2">{Tayangan.judul}</td>
                                     <td className="border border-gray-300 px-4 py-2">{Tayangan.sinopsis}</td>
                                     <td className="border border-gray-300 px-4 py-2"><a href={Tayangan.url} className="text-blue-500" target="_blank" rel="noopener noreferrer">Lihat Tayangan</a></td>
-                                    <td className="border border-gray-300 px-4 py-2">{Tayangan.tanggalRilis}</td>
+                                    <td className="border border-gray-300 px-4 py-2">{Tayangan.release_date_trailer}</td>
                                     <td className="border border-gray-300 px-4 py-2">
-                                        <DetailFilmLink href="/detail-tayangan-film" isActive={pathname === "/detail-tayangan-film"}>
+                                        <DetailFilmLink href={`/detail-tayangan-film/${Tayangan.id}`} isActive={pathname === "/detail-tayangan-film"}>
                                             More
                                         </DetailFilmLink>
                                     </td>
@@ -265,14 +309,14 @@ export default function Tayangan() {
                             </tr>
                         </thead>
                         <tbody>
-                            {seriestayangan.map((Tayangan, index) => (
+                            {seriesTrailers.map((Tayangan, index) => (
                                 <tr key={index}>
                                     <td className="border border-gray-300 px-4 py-2">{Tayangan.judul}</td>
                                     <td className="border border-gray-300 px-4 py-2">{Tayangan.sinopsis}</td>
                                     <td className="border border-gray-300 px-4 py-2"><a href={Tayangan.url} className="text-blue-500" target="_blank" rel="noopener noreferrer">Lihat Tayangan</a></td>
-                                    <td className="border border-gray-300 px-4 py-2">{Tayangan.tanggalRilis}</td>
+                                    <td className="border border-gray-300 px-4 py-2">{Tayangan.release_date_trailer}</td>
                                     <td className="border border-gray-300 px-4 py-2">
-                                        <DetailSeriesLink href="/detail-tayangan-series" isActive={pathname === "/detail-tayangan-series"}>
+                                        <DetailSeriesLink href={`/detail-tayangan-series/${Tayangan.id}`} isActive={pathname === "/detail-tayangan-series"}>
                                             More
                                         </DetailSeriesLink>
                                     </td>

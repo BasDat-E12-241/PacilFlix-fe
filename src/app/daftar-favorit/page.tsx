@@ -1,45 +1,90 @@
-"use client";
-import React, { useState } from 'react';
+"use client"
+import React, { useEffect, useState } from 'react';
 import Navbar from '../navbar';
-import { useAuth } from '../contexts/authContext';
+import { useAuth } from '@/app/contexts/authContext';
 
-const favorites = [
-  { judul: 'Judul Favorit 1', waktu: '2024-04-01', id: 1 },
-  { judul: 'Judul Favorit 2', waktu: '2024-04-15', id: 2 },
-  { judul: 'Judul Favorit 3', waktu: '2024-04-20', id: 3 },
-];
+type Favorite = {
+  id_tayangan: string;
+  judul: string;
+  timestamp: string;
+}
 
 export default function DaftarFavorit() {
-  const{ username , isAuthenticated, negaraAsal } = useAuth();
-  console.log(username);
+  const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filteredFavorites, setFilteredFavorites] = useState<Favorite[]>([]);
 
-  const handleSearchChange = (event) => {
+  const { username } = useAuth();
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await fetch(`/api/daftar-favorit/${username}`);
+        console.log("Fetching data from API...");
+        if (response.ok) {
+          const data: Favorite[] = await response.json();
+          console.log("Data fetched:", data);
+          setFavorites(data);
+          setFilteredFavorites(data);
+        } else {
+          console.error('Failed to fetch favorites', await response.json());
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    }
+
+    if (username) {
+      fetchData();
+    }
+  }, [username]);
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      const filtered = favorites.filter(favorite =>
+        favorite.judul.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredFavorites(filtered);
+    }, 300);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchTerm, favorites]);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
 
-  const handleDelete = (id) => {
-    // Logik untuk menghapus item dari daftar
-    console.log("Hapus item dengan ID:", id);
-  };
+  const handleDelete = async (judul: string) => {
+    try {
+      const response = await fetch(`/api/deleteFavorite/?username=${username}&judul=${judul}`, {
+        method: 'DELETE',
+      });
 
-  const filteredFavorites = favorites.filter(favorite =>
-    favorite.judul.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+      if (response.ok) {
+        const newFavorites = favorites.filter(favorite => favorite.judul !== judul);
+        setFavorites(newFavorites);
+        setFilteredFavorites(newFavorites);
+      } else {
+        console.error('Failed to delete favorite', await response.json());
+      }
+    } catch (error) {
+      console.error('Error deleting favorite:', error);
+    }
+  };
 
   return (
     <>
       <Navbar />
-      <div className="container mx-auto pt-24"> 
-        <h1 className="text-center text-4xl my-8">Daftar Favorit</h1>
+      <div className="container mx-auto pt-24">
+        <h1 className="text-center text-4xl my-8">Daftar Favorit {username}</h1>
         <div className='flex justify-center my-4'>
           <input
-              type="text"
-              placeholder="Search"
-              value={searchTerm}
-              onChange={handleSearchChange}
-              className="p-2 shadow rounded border-0"
-              style={{ width: '300px' }} 
+            type="text"
+            placeholder="Search"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="p-2 shadow rounded border-0 text-black bg-white"
+            style={{ width: '300px' }}
           />
         </div>
         <div className="overflow-x-auto">
@@ -48,26 +93,26 @@ export default function DaftarFavorit() {
               <tr>
                 <th className="px-4 py-2">Judul</th>
                 <th className="px-4 py-2">Waktu Ditambahkan</th>
-                <th className="px-4 py-2 text-center">Aksi</th>
+                <th className="px-4 py-2">Aksi</th>
               </tr>
             </thead>
             <tbody>
-              {filteredFavorites.map((download) => (
-                <tr key={download.id} className="border-b">
-                  <td className="px-4 py-2">{download.judul}</td>
-                  <td className="px-4 py-2">{download.waktu}</td>
-                  <td className="px-4 py-2">
-                    <div className="flex justify-center">
-                      <button
-                        onClick={() => handleDelete(download.id)}
-                        className="text-white bg-red-500 hover:bg-red-700 px-4 py-2 rounded focus:outline-none"
-                      >
-                        Hapus
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+            {filteredFavorites.length > 0 ? filteredFavorites.map((favorite, index) => (
+              <tr key={index}>
+                <td className="px-4 py-2">{favorite.judul}</td>
+                <td className="px-4 py-2">{new Date(favorite.timestamp).toLocaleString()}</td>
+                <td className="px-4 py-2">
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() => handleDelete(favorite.judul)}
+                      className="text-white bg-red-500 hover:bg-red-700 px-4 py-2 rounded focus:outline-none"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            )) : <tr><td colSpan={3} className="text-center py-4">Tidak ada item yang ditemukan</td></tr>}
             </tbody>
           </table>
         </div>
