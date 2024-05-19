@@ -30,6 +30,12 @@ type Ulasan = {
   deskripsi: string;
 };
 
+type Favorite = {
+  id_tayangan: string;
+  judul: string;
+  timestamp: string;
+}
+
 function DetailEpisodeLink({ href, isActive, children }) {
   return (
     <div className={`${isActive ? "active" : ""}`}>
@@ -58,8 +64,32 @@ export default function DetailsSeries({ params }: { params: { id: string } }) {
   const [ulasanGet, setUlasanGet] = useState<Ulasan[]>([]);
   const [rataRataRating, setRataRataRating] = useState(0);
   const { push } = useRouter();
+  const [favorites, setFavorites] = useState<Favorite[]>([]);
+  const [chosenFavorite, setChosenFavorite] = useState(''); // State untuk menyimpan judul favorit yang dipilih
 
   const idTayangan = params.id;
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await fetch(`/api/daftar-favorit/${username}`);
+        console.log("Fetching data from API...");
+        if (response.ok) {
+          const data: Favorite[] = await response.json();
+          console.log("Data fetched:", data);
+          setFavorites(data);
+        } else {
+          console.error('Failed to fetch favorites', await response.json());
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    }
+
+    if (username) {
+      fetchData();
+    }
+  }, [username]);
 
   useEffect(() => {
     async function fetchData() {
@@ -181,6 +211,24 @@ export default function DetailsSeries({ params }: { params: { id: string } }) {
   
   };
 
+  const addFavorite = () => {
+    if (!chosenFavorite) {
+      alert('Please choose a favorite');
+      return;
+    }
+    fetch(`/api/addFavorite/?username=${username}&timestamp=${chosenFavorite}&id_tayangan=${idTayangan}`, {
+      method: 'POST',
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        alert('Berhasil menambahkan ke daftar favorit');
+        setShowModalFavorit(false);
+        push('/daftar-favorit');
+      })
+      .catch(error => alert(error.message));
+  }
+
   const UlasanCard = ({ username, deskripsi, rating }: { username: string, deskripsi: string, rating: number }) => {
     return (
       <div className="bg-white rounded-lg shadow-md p-6 mb-4 w-[790px]">
@@ -225,12 +273,15 @@ export default function DetailsSeries({ params }: { params: { id: string } }) {
               <h2 className="text-lg font-bold text-white mb-4">Tambah Ke Daftar Favorit</h2>
               <label htmlFor="favorite-dropdown" className="block text-sm font-medium text-gray-200">Judul Daftar Favorit</label>
               <div className="mt-1 relative">
-                <select id="favorite-dropdown" className="block w-full pl-3 pr-10 py-2 text-base border-gray-500 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm rounded-md bg-gray-700 text-white">
-                  <option>Pilih Favorit</option>
+                <select id="favorite-dropdown" className="block w-full pl-3 pr-10 py-2 text-base border-gray-500 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm rounded-md bg-gray-700 text-white" onChange={(e) => {setChosenFavorite(e.target.value); console.log(e.target.value)}}>
+                  <option key={1} value={''}>Choose a favorite</option>
+                  {favorites.map((favorite, index) => (
+                    <option key={index} value={favorite.timestamp}>{favorite.judul}</option>
+                  ))}
                   Favorit
                 </select>
               </div>
-              <button onClick={()=> setShowModalFavorit(false)} className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-800 focus:outline-none">Tambah</button>
+              <button onClick={() => addFavorite()} className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-800 focus:outline-none">Tambah</button>
             </div>
           </div>
         </div>
