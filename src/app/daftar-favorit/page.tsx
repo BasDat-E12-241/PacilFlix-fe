@@ -1,12 +1,12 @@
-"use client";
-import React, { useState, useEffect } from 'react';
+"use client"
+import React, { useEffect, useState } from 'react';
 import Navbar from '../navbar';
 import { useAuth } from '@/app/contexts/authContext';
 
-interface Favorite {
-  id: number;
+type Favorite = {
+  id_tayangan: string;
   judul: string;
-  waktu: string;
+  timestamp: string;
 }
 
 export default function DaftarFavorit() {
@@ -18,18 +18,25 @@ export default function DaftarFavorit() {
 
   useEffect(() => {
     async function fetchData() {
-      if (username) {
-        const response = await fetch(`/api/favorites?username=${username}`);
+      try {
+        const response = await fetch(`/api/daftar-favorit/${username}`);
+        console.log("Fetching data from API...");
         if (response.ok) {
           const data: Favorite[] = await response.json();
+          console.log("Data fetched:", data);
           setFavorites(data);
           setFilteredFavorites(data);
         } else {
-          console.error('Failed to fetch favorites');
+          console.error('Failed to fetch favorites', await response.json());
         }
+      } catch (error) {
+        console.error('Error fetching data:', error);
       }
     }
-    fetchData();
+
+    if (username) {
+      fetchData();
+    }
   }, [username]);
 
   useEffect(() => {
@@ -43,14 +50,26 @@ export default function DaftarFavorit() {
     return () => clearTimeout(delayDebounce);
   }, [searchTerm, favorites]);
 
-  const handleSearchChange = (event) => {
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
 
-  const handleDelete = (id) => {
-    const newFavorites = favorites.filter(favorite => favorite.id !== id);
-    setFavorites(newFavorites);
-    setFilteredFavorites(newFavorites);
+  const handleDelete = async (judul: string) => {
+    try {
+      const response = await fetch(`/api/deleteFavorite/?username=${username}&judul=${judul}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        const newFavorites = favorites.filter(favorite => favorite.judul !== judul);
+        setFavorites(newFavorites);
+        setFilteredFavorites(newFavorites);
+      } else {
+        console.error('Failed to delete favorite', await response.json());
+      }
+    } catch (error) {
+      console.error('Error deleting favorite:', error);
+    }
   };
 
   return (
@@ -78,23 +97,22 @@ export default function DaftarFavorit() {
               </tr>
             </thead>
             <tbody>
-              {filteredFavorites.length > 0 ? filteredFavorites.map((favorite) => (
-                
-                <tr key={favorite.id} className="border-b">
-                  <td className="px-4 py-2">{favorite.judul}</td>
-                  <td className="px-4 py-2">{favorite.waktu}</td>
-                  <td className="px-4 py-2">
-                    <div className="flex justify-center">
-                      <button
-                        onClick={() => handleDelete(favorite.id)}
-                        className="text-white bg-red-500 hover:bg-red-700 px-4 py-2 rounded focus:outline-none"
-                      >
-                        Hapus
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              )) : <tr><td colSpan={3} className="text-center py-4">Tidak ada item yang ditemukan</td></tr>}
+            {filteredFavorites.length > 0 ? filteredFavorites.map((favorite, index) => (
+              <tr key={index}>
+                <td className="px-4 py-2">{favorite.judul}</td>
+                <td className="px-4 py-2">{new Date(favorite.timestamp).toLocaleString()}</td>
+                <td className="px-4 py-2">
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() => handleDelete(favorite.judul)}
+                      className="text-white bg-red-500 hover:bg-red-700 px-4 py-2 rounded focus:outline-none"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            )) : <tr><td colSpan={3} className="text-center py-4">Tidak ada item yang ditemukan</td></tr>}
             </tbody>
           </table>
         </div>

@@ -1,35 +1,43 @@
-"use client";
-import React, { useEffect, useState, useContext } from 'react';
+"use client"
+import React, { useEffect, useState } from 'react';
 import Navbar from '../navbar';
 import { useAuth } from '@/app/contexts/authContext';
 
-interface Download {
-  id: number;
+type Download = {
+  id_tayangan: string;
   judul: string;
-  waktu: string;
+  timestamp: string;
 }
 
 export default function DaftarUnduhan() {
   const [downloads, setDownloads] = useState<Download[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredDownloads, setFilteredDownloads] = useState<Download[]>([]);
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
 
   const { username } = useAuth();
 
   useEffect(() => {
     async function fetchData() {
-      if (username) {
-        const response = await fetch(`/api/downloads?username=${username}`);
+      try {
+        const response = await fetch(`/api/daftar-unduhan/${username}`);
+        console.log("Fetching data from API...");
         if (response.ok) {
           const data: Download[] = await response.json();
           setDownloads(data);
           setFilteredDownloads(data);
         } else {
-          console.error('Failed to fetch downloads');
+          console.error('Failed to fetch downloads', await response.json());
         }
+      } catch (error) {
+        console.error('Error fetching data:', error);
       }
     }
-    fetchData();
+
+    if (username) {
+      fetchData();
+    }
   }, [username]);
 
   useEffect(() => {
@@ -47,10 +55,32 @@ export default function DaftarUnduhan() {
     setSearchTerm(event.target.value);
   };
 
-  const handleDelete = (id: number) => {
-    const newDownloads = downloads.filter(download => download.id !== id);
-    setDownloads(newDownloads);
-    setFilteredDownloads(newDownloads);
+  const handleDelete = async (id_tayangan: string) => {
+    try {
+      const response = await fetch(`/api/deleteUnduhan?username=${username}&id_tayangan=${id_tayangan}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        const newDownloads = downloads.filter(download => download.id_tayangan !== id_tayangan);
+        setDownloads(newDownloads);
+        setFilteredDownloads(newDownloads);
+      } else {
+        const errorData = await response.json();
+        setModalMessage(errorData.message);
+        setShowModal(true);
+        console.error('Failed to delete download', errorData);
+      }
+    } catch (error) {
+      setModalMessage('Server error');
+      setShowModal(true);
+      console.error('Error deleting download:', error);
+    }
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setModalMessage('');
   };
 
   return (
@@ -78,26 +108,41 @@ export default function DaftarUnduhan() {
               </tr>
             </thead>
             <tbody>
-            {filteredDownloads.length > 0 ? filteredDownloads.map((download) => (
-              <tr key={download.id} className="border-b">
-                <td className="px-4 py-2">{download.judul}</td>
-                <td className="px-4 py-2">{download.waktu}</td>
-                <td className="px-4 py-2">
-                  <div className="flex justify-center">
-                    <button
-                      onClick={() => handleDelete(download.id)}
-                      className="text-white bg-red-500 hover:bg-red-700 px-4 py-2 rounded focus:outline-none"
-                    >
-                      Hapus
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            )) : <tr><td colSpan={3} className="text-center py-4">Tidak ada item yang ditemukan</td></tr>}
+              {filteredDownloads.length > 0 ? filteredDownloads.map((download, index) => (
+                <tr key={index}>
+                  <td className="px-4 py-2">{download.judul}</td>
+                  <td className="px-4 py-2">{new Date(download.timestamp).toLocaleString()}</td>
+                  <td className="px-4 py-2">
+                    <div className="flex justify-center">
+                      <button
+                        onClick={() => handleDelete(download.id_tayangan)}
+                        className="text-white bg-red-500 hover:bg-red-700 px-4 py-2 rounded focus:outline-none"
+                      >
+                        Hapus
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              )) : <tr><td colSpan={3} className="text-center py-4">Tidak ada item yang ditemukan</td></tr>}
             </tbody>
           </table>
         </div>
       </div>
+
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-black p-6 rounded shadow-lg text-center">
+            <h2 className="text-xl font-bold mb-4">Gagal Menghapus Tayangan Dari Daftar Unduhan</h2>
+            <p className="mb-4">Tayangan minimal harus berada di daftar unduhan selama 1 hari agar bisa dihapus.</p>
+            <button
+              onClick={closeModal}
+              className="text-white bg-blue-500 hover:bg-blue-700 px-4 py-2 rounded focus:outline-none"
+            >
+              Tutup Modal
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
