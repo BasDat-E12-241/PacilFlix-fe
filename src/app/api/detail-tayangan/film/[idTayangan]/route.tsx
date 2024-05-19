@@ -8,6 +8,7 @@ export async function GET(
 ) {
     try {
         unstable_noStore()
+        console.log("params kepanggil", params);
         let query;
         query = await sql`
         WITH views AS (
