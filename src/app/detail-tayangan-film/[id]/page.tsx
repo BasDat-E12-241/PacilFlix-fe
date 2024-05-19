@@ -3,6 +3,7 @@
 import { useAuth } from "@/app/contexts/authContext";
 import React, { useState, useEffect } from "react";
 import { AiFillStar, AiOutlineStar } from 'react-icons/ai';
+import { useAuth } from "@/app/contexts/authContext";
 import { useRouter } from 'next/navigation';
 
 type FilmTayangan = {
@@ -28,13 +29,13 @@ type Ulasan = {
 };
 
 export default function DetailsFilm({ params }: { params: { id: string } }) {
-  const { username, isAuthenticated, negaraAsal } = useAuth();
+  const { username } = useAuth();
   const [rating, setRating] = useState(0); // State untuk menyimpan rating yang dipilih
   const [ulasan, setUlasan] = useState("");
   const [filmData, setFilmData] = useState<FilmTayangan>(); // Menggunakan tipe FilmTayangan atau undefined
   const [ulasanGet, setUlasanGet] = useState<Ulasan[]>([]);
+  const [sliderValue, setSliderValue] = useState(0);
   const { push } = useRouter();
-
   const idTayangan = params.id; // Menggunakan searchParams.id
 
   useEffect(() => {
@@ -137,17 +138,74 @@ export default function DetailsFilm({ params }: { params: { id: string } }) {
     );
   };
 
+  const updateSliderValue = (e) => {
+    setSliderValue(e.target.value);
+  };
+
+  const submitProgress = (durasi : number) => {
+    console.log("Durasi film: " + durasi + " menit");
+    console.log("Progress: " + sliderValue + "%");
+    
+    if (sliderValue >= 70) {
+      const start_date_time = new Date();
+      const watchedDuration = Math.ceil((sliderValue / 100) * durasi); // Durasi yang sudah ditonton dalam menit
+      const end_date_time = new Date(start_date_time);
+      end_date_time.setMinutes(start_date_time.getMinutes() + watchedDuration);
+  
+      // Format timestamp without time zone
+      const formatTimestamp = (date) => {
+        const pad = (num) => (num < 10 ? '0' : '') + num;
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+      };
+  
+      const formattedStartDateTime = formatTimestamp(start_date_time);
+      const formattedEndDateTime = formatTimestamp(end_date_time);
+  
+      console.log("Start Date Time: " + formattedStartDateTime);
+      console.log("End Date Time: " + formattedEndDateTime);
+
+      fetch('/api/detail-tayangan/film/progress', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          id_tayangan: idTayangan,
+          username: username,
+          start_date_time: formattedStartDateTime,
+          end_date_time: formattedEndDateTime
+        }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Success:', data);
+        alert('Progress berhasil disimpan!');
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat menyimpan progress.');
+      });
+
+      alert('Progress berhasil disimpan!');
+      push('/daftar-tayangan');
+    } else {
+      alert('Terjadi kesalahan saat menyimpan progress.');
+    }
+
+  };
+
   return (
     <section className="bg-primary min-h-screen flex flex-col items-center justify-center gap-4 mt-16">
       <h1 className="text-2xl font-semibold mt-10">Halaman Film</h1>
       <h3 className="text-lg font-reguler">Judul</h3>
       <h1 className="text-2xl font-semibold">{filmData?.judul}</h1>
       <div className="flex mt-4">
-        <div
+        <button
+          onClick={() => submitProgress(filmData?.durasi || 0)}
           className={`rounded-full bg-red-primary mr-4 flex justify-center items-center p-1 w-40`}
         >
           <span className="text-white text-base">Tonton</span>
-        </div>
+        </button>
         <div
           className={`rounded-full bg-red-primary mr-4 flex justify-center items-center p-1 w-40`}
         >
@@ -158,6 +216,20 @@ export default function DetailsFilm({ params }: { params: { id: string } }) {
         >
           <span className="text-white text-base">Favorite</span>
         </div>
+      </div>
+      <div className="flex mt-4 flex-col items-center">
+        <h2 className="text-lg font-reguler mb-4">Progress Menonton Film/Episode</h2>
+        <input
+          type="range"
+          id="progressSlider"
+          className="slider"
+          min="0"
+          max="100"
+          value={sliderValue}
+          onChange={updateSliderValue}
+          style={{ width: '400px', height: '10px', color : 'red'}}
+        />
+        <p className="text-lg font-reguler mt-4">Progress: <span id="sliderValue">{sliderValue}</span>%</p>
       </div>
       <div className="flex mt-4">
         <label className="flex flex-col gap-2 mr-4">
