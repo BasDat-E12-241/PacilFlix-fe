@@ -19,7 +19,8 @@ export async function GET(
                 id_tayangan,
                 username,
                 rating,
-                deskripsi
+                deskripsi,
+                timestamp
             FROM
                 ulasan
             WHERE

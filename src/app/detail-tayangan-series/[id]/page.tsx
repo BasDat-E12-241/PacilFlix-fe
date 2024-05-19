@@ -129,7 +129,12 @@ export default function DetailsSeries({ params }: { params: { id: string } }) {
           }
           const data = await response.json();
           console.log("data ulasan", data);
-          setUlasanGet(data);
+          const sortedData = data.sort((a, b) => {
+            const dateA = new Date(a.timestamp).getTime();
+            const dateB = new Date(b.timestamp).getTime();
+            return dateB - dateA;
+          });     
+          setUlasanGet(sortedData);
 
           // Menghitung rata-rata rating
           if (data.length > 0) {

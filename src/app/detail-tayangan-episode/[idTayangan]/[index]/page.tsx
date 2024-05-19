@@ -41,6 +41,7 @@ export default function DetailsEpisode({ params }: { params: { idTayangan: strin
   const pathname = usePathname();
   const [sliderValue, setSliderValue] = useState(0);
   const { push } = useRouter();
+  const [isReleased, setIsReleased] = useState(false);
 
 
   const idTayangan = params.idTayangan; 
@@ -59,6 +60,15 @@ export default function DetailsEpisode({ params }: { params: { idTayangan: strin
           const data = await response.json();
           console.log("data episode", data);
           setFilmData(data);
+          
+          if (data[index]?.release_date) {
+            console.log("Tanggal rilis:", data[index]?.release_date);
+            const releaseDate = new Date(data[index]?.release_date);
+            console.log("Tanggal rilis:", releaseDate);
+            const currentDate = new Date();
+            console.log("Tanggal sekarang:", currentDate);
+            setIsReleased(currentDate >= releaseDate);
+          }
         } else {
           console.log("idTayangan is not available");
         }
@@ -135,12 +145,17 @@ export default function DetailsEpisode({ params }: { params: { idTayangan: strin
       <h3 className="text-lg font-reguler">Sub-Judul</h3>
       <h1 className="text-lg font-semibold">{filmData[index]?.sub_judul}</h1>
       <div className="flex mt-4">
-        <button
+        {isReleased && <button
           onClick={() => submitProgress(filmData[index]?.durasi || 0)}
           className={`rounded-full bg-red-primary mr-4 flex justify-center items-center p-1 w-40`}
         >
           <span className="text-white text-base">Tonton</span>
-        </button>
+        </button>}
+        {!isReleased && <button
+          className={`rounded-full border-2 border-red-primary mr-4 flex justify-center items-center p-1 w-40`}
+        >
+          <span className="text-white text-base">Tonton</span>
+        </button>}
         <div
           className={`rounded-full bg-red-primary mr-4 flex justify-center items-center p-1 w-40`}
         >

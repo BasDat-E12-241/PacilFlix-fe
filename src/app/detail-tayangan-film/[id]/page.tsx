@@ -37,6 +37,7 @@ export default function DetailsFilm({ params }: { params: { id: string } }) {
   const { push } = useRouter();
   const [rataRataRating, setRataRataRating] = useState(0);
   const idTayangan = params.id; // Menggunakan searchParams.id
+  const [isReleased, setIsReleased] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -62,6 +63,14 @@ export default function DetailsFilm({ params }: { params: { id: string } }) {
           sutradara: data[0].nama_sutradara ? data[0].nama_sutradara.split(", ") : null,
         };
 
+        if (adaptedData.tanggalRilis) {
+          console.log("Tanggal rilis:", adaptedData.tanggalRilis);
+          const releaseDate = new Date(adaptedData.tanggalRilis);
+          console.log("Tanggal rilis:", releaseDate);
+          const currentDate = new Date();
+          console.log("Tanggal sekarang:", currentDate);
+          setIsReleased(currentDate >= releaseDate);
+        }
         setFilmData(adaptedData);
       } catch (error) {
         console.error('Error:', error.message);
@@ -108,7 +117,13 @@ export default function DetailsFilm({ params }: { params: { id: string } }) {
           }
           const data = await response.json();
           console.log("data ulasan", data);
-          setUlasanGet(data);
+          console.log("timestamp data: ", data[0].timestamp)
+          const sortedData = data.sort((a, b) => {
+            const dateA = new Date(a.timestamp).getTime();
+            const dateB = new Date(b.timestamp).getTime();
+            return dateB - dateA;
+          });          
+          setUlasanGet(sortedData);
 
           // Menghitung rata-rata rating
           if (data.length > 0) {
@@ -210,12 +225,17 @@ export default function DetailsFilm({ params }: { params: { id: string } }) {
       <h3 className="text-lg font-reguler">Judul</h3>
       <h1 className="text-2xl font-semibold">{filmData?.judul}</h1>
       <div className="flex mt-4">
-        <button
+      {isReleased && <button
           onClick={() => submitProgress(filmData?.durasi || 0)}
           className={`rounded-full bg-red-primary mr-4 flex justify-center items-center p-1 w-40`}
         >
           <span className="text-white text-base">Tonton</span>
-        </button>
+        </button>}
+        {!isReleased && <button
+          className={`rounded-full border-2 border-red-primary mr-4 flex justify-center items-center p-1 w-40`}
+        >
+          <span className="text-white text-base">Tonton</span>
+        </button>}
         <div
           className={`rounded-full bg-red-primary mr-4 flex justify-center items-center p-1 w-40`}
         >
