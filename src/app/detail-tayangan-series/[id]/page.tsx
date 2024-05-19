@@ -160,32 +160,25 @@ export default function DetailsSeries({ params }: { params: { id: string } }) {
     fetchDataUlasan();
   }, [idTayangan]);
 
+  const [nextDate, setNextDate] = useState("");
+  useEffect(() => {
+    setNextDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString());
+  }, [])
+  const handleDownload = (id_tayangan: string, username: string) => {
+    fetch('/api/addDownload', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id_tayangan, username }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        setShowModalUnduhan(false)
+        push('/daftar-unduhan');
+      })
+      .catch(error => alert(error.message));
   
-
-  const handleDownload = async () => {
-    try {
-      const response = await fetch('/api/addDownload', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id_tayangan: idTayangan, username: 'pengguna' }), // Ganti 'pengguna' dengan username yang sesuai
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUnduhMessage(`Selamat! Anda telah berhasil mengunduh ${filmData?.judul} dan akan berlaku hingga ${new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleString()}. Cek informasi selengkapnya pada halaman daftar unduhan.`);
-        setShowModalUnduhan(true);
-      } else {
-        const errorData = await response.json();
-        setUnduhMessage(errorData.message);
-        setShowModalUnduhan(true);
-      }
-    } catch (error) {
-      console.error('Error downloading:', error);
-      setUnduhMessage('Gagal menambahkan tayangan ke daftar unduhan');
-      setShowModalUnduhan(true);
-    }
   };
 
   const UlasanCard = ({ username, deskripsi, rating }: { username: string, deskripsi: string, rating: number }) => {
@@ -213,10 +206,10 @@ export default function DetailsSeries({ params }: { params: { id: string } }) {
       <h1 className="text-2xl font-semibold">{filmData?.judul}</h1>
       <div className="flex mt-4">
         <div
-          onClick={handleDownload}
+          onClick={()=> setShowModalUnduhan(true)}
           className={`rounded-full bg-red-primary mr-4 flex justify-center items-center p-1 w-40 hover:cursor-pointer`}
         >
-          <span className="text-white text-base">Unduh</span>
+          <span className="text-white text-base w-full text-center">Unduh</span>
         </div>
         <div
           onClick={()=> setShowModalFavorit(true)}
@@ -242,7 +235,7 @@ export default function DetailsSeries({ params }: { params: { id: string } }) {
           </div>
         </div>
       </div>
-      <div className="flex mt-4 mt-[80px]">
+      <div className="flex mt-4]">
         {Array.from({ length: filmData?.jumlahEpisode ?? 0 }, (_, index) => (
           <DetailEpisodeLink
             key={index}
@@ -253,7 +246,7 @@ export default function DetailsSeries({ params }: { params: { id: string } }) {
           </DetailEpisodeLink>
         ))}
       </div>
-      <div className="flex mt-4 mt-[80px]">
+      <div className="flex mt-4]">
         <label className="flex flex-col gap-2 mr-4">
           <span className="font-semibold">Total Views</span>
           <div className="border-4 transition-all border-solid rounded-lg px-3 py-1.5 w-64 bg-white text-black focus:border-red-primary overflow-hidden">
@@ -394,23 +387,17 @@ export default function DetailsSeries({ params }: { params: { id: string } }) {
       </div>
 
 
-      {showModalUnduhan && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-black p-6 rounded shadow-lg text-center">
+      <div className={`fixed inset-0 bg-black bg-opacity-0 flex justify-center items-center transition-all duration-500 ${showModalUnduhan ? "scale-100" : "scale-0"}`}>
+          <div onClick={()=> setShowModalUnduhan(false)} className={`fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center transition-all`}></div>
+          <div className="bg-gray-800 p-5 z-10 rounded-lg shadow-2xl text-center">
             <h2 className="text-lg font-bold text-green-500 mb-4">SUKSES MENAMBAHKAN TAYANGAN KE DAFTAR UNDUHAN!</h2>
-            <p className="text-white mb-4">{unduhMessage}</p>
-            <button
-              onClick={() => {
-                setShowModalUnduhan(false);
-                router.push('/daftar-unduhan');
-              }}
-              className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-800 focus:outline-none"
-            >
-              Menuju Daftar Unduhan
-            </button>
+            {/* Kotak/Card untuk teks dan tombol */}
+            <div className="bg-gray-700 p-4 rounded-lg">
+              <p className="text-white">Selamat! Anda telah berhasil mengunduh {filmData?.judul} dan akan berlaku hingga { nextDate }. Cek informasi selengkapnya pada halaman daftar unduhan.</p>
+              <button onClick={() => handleDownload(idTayangan, username)} className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 focus:outline-none">Lihat Daftar Unduhan</button>
+            </div>
           </div>
         </div>
-      )}
     </section>
   );
 }

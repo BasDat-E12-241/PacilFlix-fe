@@ -109,6 +109,27 @@ export default function DetailsFilm({ params }: { params: { id: string } }) {
       .catch(error => alert(error.message));
   };
 
+  const [nextDate, setNextDate] = useState("");
+  useEffect(() => {
+    setNextDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString());
+  }, [])
+  const handleDownload = (id_tayangan: string, username: string) => {
+    fetch('/api/addDownload', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id_tayangan, username }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        setShowModalUnduhan(false)
+        push('/daftar-unduhan');
+      })
+      .catch(error => alert(error.message));
+  
+  }
+
   useEffect(() => {
     async function fetchDataUlasan() {
       try {
@@ -214,7 +235,6 @@ export default function DetailsFilm({ params }: { params: { id: string } }) {
         alert('Terjadi kesalahan saat menyimpan progress.');
       });
 
-      alert('Progress berhasil disimpan!');
       push('/daftar-tayangan');
     } else {
       alert('Terjadi kesalahan saat menyimpan progress.');
@@ -243,25 +263,23 @@ export default function DetailsFilm({ params }: { params: { id: string } }) {
           className={`rounded-full bg-red-primary mr-4 flex justify-center items-center p-1 w-40 hover:cursor-pointer`}
         >
         <div
-        onClick={()=> setShowModalUnduhan(true)}
-        className={`rounded-full bg-red-primary mr-4 flex justify-center items-center p-1 w-40 hover:cursor-pointer`}
+          onClick={()=> setShowModalUnduhan(true)}
+          className={`rounded-full bg-red-primary flex justify-center items-center p-1 w-40 hover:cursor-pointer`}
         >
-        <span className="text-white text-base">Unduh</span>
+          <span className="text-white text-base w-full text-center">Unduh</span>
         </div>
         </div>
-          <div className={`fixed inset-0 bg-black bg-opacity-0 flex justify-center items-center transition-all ${showModalUnduhan ? "scale-100" : "scale-0"}`}>
-          <div onClick={()=> setShowModalUnduhan(false)} className={`fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center transition-all ${showModalFavorit ? "scale-100" : "scale-0"}`}> 
-          </div>
-            <div className="bg-gray-800 p-5 rounded-lg shadow-2xl text-center">
-              <h2 className="text-lg font-bold text-green-500 mb-4">SUKSES MENAMBAHKAN TAYANGAN KE DAFTAR UNDUHAN!</h2>
-              
-              {/* Kotak/Card untuk teks dan tombol */}
-              <div className="bg-gray-700 p-4 rounded-lg">
-                <p className="text-white">Selamat! Anda telah berhasil mengunduh [Judul Tayangan] dan akan berlaku hingga [current time + 7 hari]. Cek informasi selengkapnya pada halaman daftar unduhan.</p>
-                <button onClick={()=> setShowModalUnduhan(false)} className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-800 focus:outline-none">Menuju Daftar Unduhan</button>
-              </div>
+        <div className={`fixed inset-0 bg-black bg-opacity-0 flex justify-center items-center transition-all duration-500 ${showModalUnduhan ? "scale-100" : "scale-0"}`}>
+          <div onClick={()=> setShowModalUnduhan(false)} className={`fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center transition-all`}></div>
+          <div className="bg-gray-800 p-5 z-10 rounded-lg shadow-2xl text-center">
+            <h2 className="text-lg font-bold text-green-500 mb-4">SUKSES MENAMBAHKAN TAYANGAN KE DAFTAR UNDUHAN!</h2>
+            {/* Kotak/Card untuk teks dan tombol */}
+            <div className="bg-gray-700 p-4 rounded-lg">
+              <p className="text-white">Selamat! Anda telah berhasil mengunduh {filmData?.judul} dan akan berlaku hingga { nextDate }. Cek informasi selengkapnya pada halaman daftar unduhan.</p>
+              <button onClick={() => handleDownload(idTayangan, username)} className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 focus:outline-none">Lihat Daftar Unduhan</button>
             </div>
           </div>
+        </div>
         <div
           onClick={()=> setShowModalFavorit(true)}
           className={`rounded-full bg-red-primary mr-4 flex justify-center items-center p-1 w-40 hover:cursor-pointer`}
