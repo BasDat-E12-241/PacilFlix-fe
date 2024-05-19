@@ -178,6 +178,7 @@ export default function DetailsSeries({ params }: { params: { id: string } }) {
       <div className="flex mt-4 mt-[80px]">
         {Array.from({ length: filmData?.jumlahEpisode ?? 0 }, (_, index) => (
           <DetailEpisodeLink
+            key={index}
             href={`/detail-tayangan-episode/${idTayangan}/${index}`}
             isActive={pathname === `/detail-tayangan-episode`}
           >
