@@ -40,25 +40,30 @@ type Trailer = {
     url: string;
     release_date_trailer: string;
     total_view: number;
-};
-
-type GlobalTrailer = Trailer & {
-    tipe: "Film" | "Series";
-};
-
-type CountryTrailer = Trailer & {
-    tipe: "Film" | "Series";
+    tipe: string;
 };
 
 type FilmTrailer = Trailer;
 
 type SeriesTrailer = Trailer;
 
-const fetchGlobalsTrailers = async () => {
+const fetchGlobalsTrailers = async (search: string = "") => {
     try {
-        const response = await fetch(`/api/tayangan/global`);
-        const data = await response.json();
-        return data;
+        console.log('search di fetch: ', search);
+
+        if (!search || search === "") {
+            console.log('search kosong');
+            const response = await fetch(`/api/tayangan/global`);
+            const data = await response.json();
+            return data;
+        } else {
+            console.log('search tidak kosong');
+            const response = await fetch(`/api/tayangan/global/${search}`);
+            const data = await response.json();
+            return data;
+        }
+
+
     } catch (error) {
         console.error('Failed to fetch global trailers:', error);
         return [];
@@ -102,19 +107,21 @@ const fetchSeriesTrailers = async () => {
 
 export default function Tayangan() {
     const { username, isAuthenticated, negaraAsal } = useAuth();
-    const [isActive, setIsActive] = useState(true);
-    const [trailersGlobal, setTrailersGlobal] = useState<GlobalTrailer[]>([]);
-    const [filmTrailers, setFilmTrailers] = useState<FilmTrailer[]>([]);
-    const [seriesTrailers, setSeriesTrailers] = useState<SeriesTrailer[]>([]);
-    const [CountryTrailers, setCountryTrailers] = useState<CountryTrailer[]>([]);
-    const [country, setCountry] = useState<string>("");
     const pathname = usePathname();
-    // const [search, setSearchValue] = useState<string>("");
-    // const [searchResults, setSearchResults] = useState<Trailer[]>([]);
+    const [isActive, setIsActive] = useState(true);
+    const [country, setCountry] = useState<string>("");
+    const [search, setSearchValue] = useState<string>("");
+    const [searchResults, setSearchResults] = useState<Trailer[]>([]);
+    const [trailersGlobal, setTrailersGlobal] = useState<Trailer[]>([]);
+    const [filmTrailers, setFilmTrailers] = useState<FilmTrailer[]>([]);
+    const [CountryTrailers, setCountryTrailers] = useState<Trailer[]>([]);
+    const [seriesTrailers, setSeriesTrailers] = useState<SeriesTrailer[]>([]);
 
     useEffect(() => {
         const loadGlobalsTrailers = async () => {
-            const data = await fetchGlobalsTrailers();
+            console.log('search: ', search);
+            const data = await fetchGlobalsTrailers(search);
+            console.log('data: ', data);
             setTrailersGlobal(data);
         };
 
@@ -150,16 +157,29 @@ export default function Tayangan() {
         loadSeriesTrailers();
     }, []);
 
+    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchValue(event.target.value);
+    };
+
+    useEffect(() => {
+        if (search || search !== "") {
+            const loadSearchTrailers = async () => {
+                const data = await fetchGlobalsTrailers(search);
+                setSearchResults(data);
+            };
+
+            loadSearchTrailers();
+        }
+    }, [search]);
+
     const handleGlobalButtonClick = () => {
         setIsActive(true);
     };
 
-    // Tambahkan nomor peringkat
     trailersGlobal.forEach((trailer, index) => {
         trailer.peringkat = index + 1;
     });
 
-    // Tambahkan nomor peringkat
     CountryTrailers.forEach((trailer, index) => {
         trailer.peringkat = index + 1;
     });
@@ -167,23 +187,31 @@ export default function Tayangan() {
     const handleCountryButtonClick = () => {
         setIsActive(false);
     };
+
+    function getTrailersToDisplay(): Trailer[] {
+        return search ? searchResults : trailersGlobal;
+    }
+
+    const trailersToDisplay: Trailer[] = getTrailersToDisplay();
+
     return (
         <section className="bg-primary min-h-screen flex flex-col items-center justify-center gap-8 mt-16">
             <h1 className="text-2xl font-semibold mt-10">Tayangan</h1>
-            <form className="flex flex-col items-center gap-6">
+            <form className="flex flex-col items-center gap-6" onSubmit={(e) => e.preventDefault()}>
                 <label className="flex flex-col gap-2">
                     <input
                         type="text"
+                        value={search}
+                        onChange={handleInputChange}
                         placeholder="Search"
-                        required
-                        className="border-4 transition-all border-solid rounded-lg px-3 py-1.5 w-[500px] bg-white text-black focus:border-red-primary"
+                        className="border-4 transition-all border-solid rounded-lg px-3 py-1.5 w-164 bg-white text-black focus:border-red-primary"
                     />
                 </label>
             </form>
             <div className="max-w-3xl w-full p-4 rounded-lg shadow-md mx-auto flex flex-col items-center">
                 <section>
                     <h2 className="text-lg font-bold my-4">10 Tayangan Terbaik Minggu Ini</h2>
-                    <div className="flex mt-4">
+                    {!search && <div className="flex mt-4">
                         <div
                             className={`rounded-full border-2 border-red-500 mr-4 flex justify-center items-center p-1 w-56 ${isActive ? "bg-red-primary" : "border-red-500"}`}
                             onClick={handleGlobalButtonClick}
@@ -196,11 +224,11 @@ export default function Tayangan() {
                         >
                             <span className="text-white text-base">Opsi Top 10 {negaraAsal}</span>
                         </div>
-                    </div>
+                    </div>}
                     <table className="w-full my-4 text-left border-collapse border border-gray-400">
                         <thead>
                             <tr>
-                                <th className="border border-gray-300 px-4 py-2">Peringkat</th>
+                                {!search && <th className="border border-gray-300 px-4 py-2">Peringkat</th>}
                                 <th className="border border-gray-300 px-4 py-2">Judul</th>
                                 <th className="border border-gray-300 px-4 py-2">Sinopsis Tayangan</th>
                                 <th className="border border-gray-300 px-4 py-2">URL Tayangan</th>
@@ -211,9 +239,9 @@ export default function Tayangan() {
                         </thead>
                         <tbody>
                             {isActive
-                                ? trailersGlobal.map((Tayangan, index) => (
+                                ? trailersToDisplay.map((Tayangan, index) => (
                                     <tr key={index}>
-                                        <td className="border border-gray-300 text-center px-4 py-2">{Tayangan.peringkat}</td>
+                                        {!search && <td className="border border-gray-300 text-center px-4 py-2">{Tayangan.peringkat}</td>}
                                         <td className="border border-gray-300 px-4 py-2">{Tayangan.judul}</td>
                                         <td className="border border-gray-300 px-4 py-2">{Tayangan.sinopsis}</td>
                                         <td className="border border-gray-300 px-4 py-2">
@@ -236,7 +264,7 @@ export default function Tayangan() {
                                         </td>
                                     </tr>
                                 ))
-                                : CountryTrailers.map((Tayangan, index) => (
+                                : !search && (CountryTrailers.map((Tayangan, index) => (
                                     <tr key={index}>
                                         <td className="border border-gray-300 text-center px-4 py-2">{Tayangan.peringkat}</td>
                                         <td className="border border-gray-300 px-4 py-2">{Tayangan.judul}</td>
@@ -256,72 +284,77 @@ export default function Tayangan() {
                                             )}
                                         </td>
                                     </tr>
-                                ))
+                                )))
                             }
                         </tbody>
                     </table>
                 </section>
 
-                <section>
-                    <h2 className="text-lg font-bold my-4">Film</h2>
-                    <table className="w-full my-4 text-left border-collapse border border-gray-400">
-                        <thead>
-                            <tr>
-                                <th className="border border-gray-300 px-4 py-2">Judul</th>
-                                <th className="border border-gray-300 px-4 py-2">Sinopsis Tayangan</th>
-                                <th className="border border-gray-300 px-4 py-2">URL Tayangan</th>
-                                <th className="border border-gray-300 px-4 py-2">Tanggal Rilis Tayangan</th>
-                                <th className="border border-gray-300 px-4 py-2">Tayangan</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filmTrailers.map((Tayangan, index) => (
-                                <tr key={index}>
-                                    <td className="border border-gray-300 px-4 py-2">{Tayangan.judul}</td>
-                                    <td className="border border-gray-300 px-4 py-2">{Tayangan.sinopsis}</td>
-                                    <td className="border border-gray-300 px-4 py-2"><a href={Tayangan.url} className="text-blue-500" target="_blank" rel="noopener noreferrer">Lihat Tayangan</a></td>
-                                    <td className="border border-gray-300 px-4 py-2">{Tayangan.release_date_trailer}</td>
-                                    <td className="border border-gray-300 px-4 py-2">
-                                        <DetailFilmLink href={`/detail-tayangan-film/${Tayangan.id}`} isActive={pathname === "/detail-tayangan-film"}>
-                                            More
-                                        </DetailFilmLink>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </section>
+                {!search && (
+                    <>
+                        <section>
+                            <h2 className="text-lg font-bold my-4">Film</h2>
+                            <table className="w-full my-4 text-left border-collapse border border-gray-400">
+                                <thead>
+                                    <tr>
+                                        <th className="border border-gray-300 px-4 py-2">Judul</th>
+                                        <th className="border border-gray-300 px-4 py-2">Sinopsis Tayangan</th>
+                                        <th className="border border-gray-300 px-4 py-2">URL Tayangan</th>
+                                        <th className="border border-gray-300 px-4 py-2">Tanggal Rilis Tayangan</th>
+                                        <th className="border border-gray-300 px-4 py-2">Tayangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filmTrailers.map((Tayangan, index) => (
+                                        <tr key={index}>
+                                            <td className="border border-gray-300 px-4 py-2">{Tayangan.judul}</td>
+                                            <td className="border border-gray-300 px-4 py-2">{Tayangan.sinopsis}</td>
+                                            <td className="border border-gray-300 px-4 py-2"><a href={Tayangan.url} className="text-blue-500" target="_blank" rel="noopener noreferrer">Lihat Tayangan</a></td>
+                                            <td className="border border-gray-300 px-4 py-2">{Tayangan.release_date_trailer}</td>
+                                            <td className="border border-gray-300 px-4 py-2">
+                                                <DetailFilmLink href={`/detail-tayangan-film/${Tayangan.id}`} isActive={pathname === "/detail-tayangan-film"}>
+                                                    More
+                                                </DetailFilmLink>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </section>
 
-                <section>
-                    <h2 className="text-lg font-bold my-4">Series</h2>
-                    <table className="w-full my-4 text-left border-collapse border border-gray-400">
-                        <thead>
-                            <tr>
-                                <th className="border border-gray-300 px-4 py-2">Judul</th>
-                                <th className="border border-gray-300 px-4 py-2">Sinopsis Tayangan</th>
-                                <th className="border border-gray-300 px-4 py-2">URL Tayangan</th>
-                                <th className="border border-gray-300 px-4 py-2">Tanggal Rilis Tayangan</th>
-                                <th className="border border-gray-300 px-4 py-2">Tayangan</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {seriesTrailers.map((Tayangan, index) => (
-                                <tr key={index}>
-                                    <td className="border border-gray-300 px-4 py-2">{Tayangan.judul}</td>
-                                    <td className="border border-gray-300 px-4 py-2">{Tayangan.sinopsis}</td>
-                                    <td className="border border-gray-300 px-4 py-2"><a href={Tayangan.url} className="text-blue-500" target="_blank" rel="noopener noreferrer">Lihat Tayangan</a></td>
-                                    <td className="border border-gray-300 px-4 py-2">{Tayangan.release_date_trailer}</td>
-                                    <td className="border border-gray-300 px-4 py-2">
-                                        <DetailSeriesLink href={`/detail-tayangan-series/${Tayangan.id}`} isActive={pathname === "/detail-tayangan-series"}>
-                                            More
-                                        </DetailSeriesLink>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </section>
+                        <section>
+                            <h2 className="text-lg font-bold my-4">Series</h2>
+                            <table className="w-full my-4 text-left border-collapse border border-gray-400">
+                                <thead>
+                                    <tr>
+                                        <th className="border border-gray-300 px-4 py-2">Judul</th>
+                                        <th className="border border-gray-300 px-4 py-2">Sinopsis Tayangan</th>
+                                        <th className="border border-gray-300 px-4 py-2">URL Tayangan</th>
+                                        <th className="border border-gray-300 px-4 py-2">Tanggal Rilis Tayangan</th>
+                                        <th className="border border-gray-300 px-4 py-2">Tayangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {seriesTrailers.map((Tayangan, index) => (
+                                        <tr key={index}>
+                                            <td className="border border-gray-300 px-4 py-2">{Tayangan.judul}</td>
+                                            <td className="border border-gray-300 px-4 py-2">{Tayangan.sinopsis}</td>
+                                            <td className="border border-gray-300 px-4 py-2"><a href={Tayangan.url} className="text-blue-500" target="_blank" rel="noopener noreferrer">Lihat Tayangan</a></td>
+                                            <td className="border border-gray-300 px-4 py-2">{Tayangan.release_date_trailer}</td>
+                                            <td className="border border-gray-300 px-4 py-2">
+                                                <DetailSeriesLink href={`/detail-tayangan-series/${Tayangan.id}`} isActive={pathname === "/detail-tayangan-series"}>
+                                                    More
+                                                </DetailSeriesLink>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </section>
+                    </>
+                )}
             </div>
+
         </section>
     );
 }
