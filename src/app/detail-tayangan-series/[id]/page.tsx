@@ -52,6 +52,7 @@ export default function DetailsSeries({ params }: { params: { id: string } }) {
   const [rating, setRating] = useState(0); 
   const [filmData, setFilmData] = useState<SeriesTayangan>();
   const [ulasanGet, setUlasanGet] = useState<Ulasan[]>([]);
+  const [rataRataRating, setRataRataRating] = useState(0);
   const { push } = useRouter();
 
   const idTayangan = params.id;
@@ -129,6 +130,15 @@ export default function DetailsSeries({ params }: { params: { id: string } }) {
           const data = await response.json();
           console.log("data ulasan", data);
           setUlasanGet(data);
+
+          // Menghitung rata-rata rating
+          if (data.length > 0) {
+            const totalRating = data.reduce((total, ulasan) => total + ulasan.rating, 0);
+            const averageRating = totalRating / data.length;
+            setRataRataRating(averageRating);
+          } else {
+            setRataRataRating(0);
+          }
         } else {
           console.log("idTayangan is not available");
         }
@@ -209,7 +219,7 @@ export default function DetailsSeries({ params }: { params: { id: string } }) {
         <label className="flex flex-col gap-2 mr-4">
           <span className="font-semibold">Rating Rata-Rata</span>
           <div className="border-4 transition-all border-solid rounded-lg px-3 py-1.5 w-64 bg-white text-black focus:border-red-primary overflow-hidden">
-            {filmData?.rating}
+            {rataRataRating}
           </div>
         </label>
         <label className="flex flex-col gap-2 mr-4">
@@ -294,7 +304,7 @@ export default function DetailsSeries({ params }: { params: { id: string } }) {
           </span>
         ))}
       </div>
-      <form onSubmit={(event) => {
+      <form className="flex flex-col items-center gap-6" onSubmit={(event) => {
         event.preventDefault();
         handleRatingSubmit();
       }}>
