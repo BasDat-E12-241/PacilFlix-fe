@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { AiFillStar, AiOutlineStar } from 'react-icons/ai';
 import { useAuth } from "@/app/contexts/authContext";
+import { useRouter } from 'next/navigation';
 
 type FilmTayangan = {
   judul: string;
@@ -42,6 +43,7 @@ export default function DetailsFilm({ params }: { params: { id: string } }) {
   const [rating, setRating] = useState(0); // State untuk menyimpan rating yang dipilih
   const [filmData, setFilmData] = useState<FilmTayangan>(); // Menggunakan tipe FilmTayangan atau undefined
   const [sliderValue, setSliderValue] = useState(0);
+  const { push } = useRouter();
   
   const idTayangan = params.id; // Menggunakan searchParams.id
 
@@ -150,6 +152,7 @@ export default function DetailsFilm({ params }: { params: { id: string } }) {
       });
 
       alert('Progress berhasil disimpan!');
+      push('/daftar-tayangan');
     } else {
       alert('Terjadi kesalahan saat menyimpan progress.');
     }

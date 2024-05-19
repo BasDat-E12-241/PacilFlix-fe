@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/app/contexts/authContext";
+import { useRouter } from 'next/navigation';
 
 type EpisodeTayangan = {
   judul_series: string;
@@ -39,6 +40,7 @@ export default function DetailsEpisode({ params }: { params: { idTayangan: strin
   const [filmData, setFilmData] = useState<EpisodeTayangan[]>([]); 
   const pathname = usePathname();
   const [sliderValue, setSliderValue] = useState(0);
+  const { push } = useRouter();
 
 
   const idTayangan = params.idTayangan; 
@@ -117,6 +119,7 @@ export default function DetailsEpisode({ params }: { params: { idTayangan: strin
       });
 
       alert('Progress berhasil disimpan!');
+      push('/daftar-tayangan');
     } else {
       alert('Terjadi kesalahan saat menyimpan progress.');
     }

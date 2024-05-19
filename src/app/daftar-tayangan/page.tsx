@@ -3,7 +3,6 @@
 import { usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../contexts/authContext";
-
 function DetailFilmLink({ href, isActive, children }) {
     return (
         <div className={`${isActive ? "active" : ""}`}>
