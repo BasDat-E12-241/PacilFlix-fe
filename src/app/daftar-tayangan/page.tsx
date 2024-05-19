@@ -8,12 +8,18 @@ import { usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../contexts/authContext";
 function DetailFilmLink({ href, isActive, children }) {
+    const { is_aktif } = useAuth();
     return (
         <div className={`${isActive ? "active" : ""}`}>
             <a
-                className={`transition-all px-3 py-1 rounded-full ${isActive ? "bg-red-primary text-white font-semibold" : "text-white bg-red-primary"} `}
+                className={`${!is_aktif && 'grayscale opacity-95'} transition-all px-3 py-1 rounded-full ${isActive ? "bg-red-primary text-white font-semibold" : "text-white bg-red-primary"} `}
                 style={{ borderRadius: "0.75rem", display: "flex", justifyContent: "center", padding: "0.5rem 1rem", width: "6.5rem", boxSizing: "border-box", textDecoration: "none", fontWeight: "600" }}
-                href={href}
+                href={is_aktif ? href : '/langganan'}
+                onClick={() => {
+                    if (!is_aktif) {
+                        alert('Anda harus berlangganan untuk melihat detail tayangan');
+                    }
+                }}
             >
                 {children}
             </a>
@@ -22,12 +28,18 @@ function DetailFilmLink({ href, isActive, children }) {
 }
 
 function DetailSeriesLink({ href, isActive, children }) {
+    const { is_aktif } = useAuth();
     return (
         <div className={`${isActive ? "active" : ""}`}>
             <a
-                className={`transition-all px-3 py-1 rounded-full ${isActive ? "bg-red-primary text-white" : "text-white bg-red-primary"} `}
+                className={`${!is_aktif && 'grayscale opacity-95'} transition-all px-3 py-1 rounded-full ${isActive ? "bg-red-primary text-white" : "text-white bg-red-primary"} `}
                 style={{ borderRadius: "0.75rem", display: "flex", justifyContent: "center", padding: "0.5rem 1rem", width: "6.5rem", boxSizing: "border-box", textDecoration: "none", fontWeight: "600" }}
-                href={href}
+                href={is_aktif ? href : '/langganan'}
+                onClick={() => {
+                    if (!is_aktif) {
+                        alert('Anda harus berlangganan untuk melihat detail tayangan');
+                    }
+                }}
             >
                 {children}
             </a>
@@ -109,7 +121,7 @@ const fetchSeriesTrailers = async () => {
 };
 
 export default function Tayangan() {
-    const { username, isAuthenticated, negaraAsal } = useAuth();
+    const { username, isAuthenticated, negaraAsal, is_aktif } = useAuth();
     const pathname = usePathname();
     const [isActive, setIsActive] = useState(true);
     const [country, setCountry] = useState<string>("");

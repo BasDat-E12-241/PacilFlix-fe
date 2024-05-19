@@ -53,7 +53,7 @@ type transactionHistory = {
 }
 
 export default function LanggananPage() {
-  const{ username , isAuthenticated, negaraAsal } = useAuth();
+  const{ username , isAuthenticated, negaraAsal, setIs_Aktif } = useAuth();
   const [aktif, setAktif] = useState<aktif[]>([]);
   const [otherSubscriptions, setOtherSubscriptions] = useState<otherSubscriptions[]>([]);
   const [transactionHistory, setTransactionHistory] = useState<transactionHistory[]>([]);
@@ -69,6 +69,7 @@ export default function LanggananPage() {
           });
           const data = await response.json();
           setAktif(data);
+          setIs_Aktif(data.length > 0);
         } catch (error) {
           console.error('Failed to fetch langganan aktif:', error);
         }
